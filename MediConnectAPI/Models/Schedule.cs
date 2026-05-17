@@ -12,7 +12,7 @@ namespace MediConnectAPI.Models
 
         public DateTime StartTime { get; set; }
 
-        public DateTime EndTime { get; set; }
+        public string EndTime { get; set; } = string.Empty;
 
         public bool IsAvailable { get; set; }
 

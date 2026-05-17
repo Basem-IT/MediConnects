@@ -1,0 +1,40 @@
+﻿@model MediConnectAPI.Models.Prescription
+
+<h1>Edit Prescription</h1>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="PrescriptionID" />
+
+    <div class="mb-3">
+        <label>Medical Record</label>
+        <select asp-for="RecordID" class="form-control" asp-items="ViewBag.RecordID"></select>
+    </div>
+
+    <div class="mb-3">
+        <label>Medication Name</label>
+        <input asp-for="MedicationName" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Dosage</label>
+        <input asp-for="Dosage" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Frequency</label>
+        <input asp-for="Frequency" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Duration</label>
+        <input asp-for="Duration" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Instructions</label>
+        <textarea asp-for="Instructions" class="form-control"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+</form>
