@@ -7,28 +7,38 @@
 		<RootNamespace>MediConnectAPI</RootNamespace>
 	</PropertyGroup>
 
+	<!-- EF Core -->
 	<ItemGroup>
-		<!-- EF Core — SQL Server provider and tools for migrations -->
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
+
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
 			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<IncludeAssets>
+				runtime; build; native; contentfiles; analyzers; buildtransitive
+			</IncludeAssets>
 		</PackageReference>
+
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
 			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<IncludeAssets>
+				runtime; build; native; contentfiles; analyzers; buildtransitive
+			</IncludeAssets>
 		</PackageReference>
+	</ItemGroup>
 
-		<!-- JWT Bearer Authentication -->
+	<!-- JWT Authentication -->
+	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
-
-		<!-- JWT read/write -->
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.3.1" />
+	</ItemGroup>
 
-		<!-- BCrypt for password hashing, it never stores plain text passwords -->
+	<!-- Password hashing -->
+	<ItemGroup>
 		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+	</ItemGroup>
 
-		<!-- Swagger UI and OpenAPI document generation -->
+	<!-- Swagger / OpenAPI -->
+	<ItemGroup>
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 	</ItemGroup>
 
