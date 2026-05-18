@@ -3,16 +3,20 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MediConnectAPI.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using MediConnectMVC.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace MediConnectMVC.Controllers
 {
     public class AppointmentsController : Controller
     {
         private readonly MediConnectDbContext _context;
+        private readonly IHubContext<AppointmentHub> _hubContext;
 
-        public AppointmentsController(MediConnectDbContext context)
+        public AppointmentsController( MediConnectDbContext context,IHubContext<AppointmentHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         public async Task<IActionResult> Index()
@@ -74,6 +78,13 @@ namespace MediConnectMVC.Controllers
             {
                 _context.Appointments.Update(appointment);
                 await _context.SaveChangesAsync();
+
+                await _hubContext.Clients.All.SendAsync("AppointmentStatusUpdated", new
+                {
+                    appointmentId = appointment.AppointmentID,
+                    status = appointment.Status
+                });
+
                 return RedirectToAction(nameof(Index));
             }
 
