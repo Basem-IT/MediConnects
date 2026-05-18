@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MediConnectAPI.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using MediConnectMVC.Filters;
 
 namespace MediConnectMVC.Controllers
 {
+    [SessionAuthorize]
     public class MedicalRecordsController : Controller
     {
         private readonly MediConnectDbContext _context;

@@ -1,10 +1,12 @@
 ﻿using MediConnectAPI.Data;
+using MediConnectAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MediConnectAPI.Models;
+using MediConnectMVC.Filters;
 
 namespace MediConnectMVC.Controllers
 {
+    [SessionAuthorize]
     public class PatientsController : Controller
     {
         private readonly MediConnectDbContext _context;
@@ -19,6 +21,7 @@ namespace MediConnectMVC.Controllers
             var patients = await _context.Patients.ToListAsync();
             return View(patients);
         }
+
         public IActionResult Create()
         {
             return View();

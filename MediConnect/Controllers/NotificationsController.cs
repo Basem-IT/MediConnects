@@ -1,8 +1,10 @@
 ﻿using MediConnectMVC.Models;
 using Microsoft.AspNetCore.Mvc;
+using MediConnectMVC.Filters;
 
 namespace MediConnectMVC.Controllers
 {
+    [SessionAuthorize]
     public class NotificationsController : Controller
     {
         public IActionResult Index()

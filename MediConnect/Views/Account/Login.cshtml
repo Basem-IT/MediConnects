@@ -1,0 +1,60 @@
+﻿@model MediConnectMVC.ViewModels.LoginViewModel
+
+<div class="d-flex justify-content-center align-items-center"
+     style="min-height: 90vh;">
+
+    <div class="card shadow p-5"
+         style="width: 500px; border-radius: 25px;">
+
+        <div class="text-center mb-4">
+
+            <img src="/Images/logoMediConnect.png"
+                 alt="Logo"
+                 style="width: 260px;" />
+
+        </div>
+
+        <h1 class="text-center mb-4">Login</h1>
+
+        <form asp-action="Login" method="post">
+
+            <div class="mb-3">
+                <label>Username</label>
+                <input asp-for="UserName"
+                       class="form-control form-control-lg" />
+            </div>
+
+            <div class="mb-4">
+                <label>Password</label>
+                <input asp-for="Password"
+                       type="password"
+                       class="form-control form-control-lg" />
+            </div>
+
+            <div class="d-grid">
+                <button type="submit"
+                        class="btn btn-primary btn-lg">
+                    Login
+                </button>
+            </div>
+
+        </form>
+
+        <p class="text-center mt-4">
+            Don't have an account?
+            <a asp-controller="Account"
+               asp-action="Register">
+                Register here
+            </a>
+        </p>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="text-danger text-center mt-3">
+                @ViewBag.Error
+            </div>
+        }
+
+    </div>
+
+</div>
