@@ -47,14 +47,22 @@ namespace MediConnectMVC.Controllers
             var userId = HttpContext.Session.GetInt32("UserID");
 
             ViewBag.Role = role;
+
             ViewBag.DoctorID = new SelectList(_context.Doctors, "DoctorID", "Name");
-            ViewBag.ScheduleID = new SelectList(_context.Schedules, "ScheduleID", "DayOfWeek");
+
+            ViewBag.ScheduleID = new SelectList(
+                _context.Schedules
+                    .GroupBy(s => s.DayOfWeek)
+                    .Select(g => g.First()),
+                "ScheduleID",
+                "DayOfWeek"
+            );
 
             if (role == "Patient")
             {
                 var patient = _context.Patients.FirstOrDefault(p => p.UserID == userId);
 
-                ViewBag.PatientName = patient?.Name ?? HttpContext.Session.GetString("UserName"); ViewBag.PatientID = patient?.PatientID;
+                ViewBag.PatientName = patient?.Name ?? HttpContext.Session.GetString("UserName");
                 ViewBag.PatientID = patient?.PatientID;
             }
             else
@@ -75,7 +83,8 @@ namespace MediConnectMVC.Controllers
 
             if (role == "Patient")
             {
-                var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserID == userId);
+                var patient = await _context.Patients
+                    .FirstOrDefaultAsync(p => p.UserID == userId);
 
                 if (patient == null)
                 {
@@ -103,16 +112,17 @@ namespace MediConnectMVC.Controllers
             ModelState.Remove("Doctor");
             ModelState.Remove("Schedule");
 
-            bool isDoubleBooked = await _context.Appointments.AnyAsync(a =>
-                a.DoctorID == appointment.DoctorID &&
-                a.ScheduleID == appointment.ScheduleID &&
-                a.AppointmentDate == appointment.AppointmentDate);
 
-            if (isDoubleBooked)
+            if (role == "Patient")
             {
-                ModelState.AddModelError("", "This doctor is already booked at this time.");
-            }
+                bool alreadyHasAppointment = await _context.Appointments
+                    .AnyAsync(a => a.PatientID == appointment.PatientID);
 
+                if (alreadyHasAppointment)
+                {
+                    ModelState.AddModelError("", "You already have an appointment booked.");
+                }
+            }
             if (ModelState.IsValid)
             {
                 _context.Appointments.Add(appointment);
@@ -128,12 +138,22 @@ namespace MediConnectMVC.Controllers
             }
 
             ViewBag.Role = role;
+
             ViewBag.DoctorID = new SelectList(_context.Doctors, "DoctorID", "Name", appointment.DoctorID);
-            ViewBag.ScheduleID = new SelectList(_context.Schedules, "ScheduleID", "DayOfWeek", appointment.ScheduleID);
+
+            ViewBag.ScheduleID = new SelectList(
+                _context.Schedules
+                    .GroupBy(s => s.DayOfWeek)
+                    .Select(g => g.First()),
+                "ScheduleID",
+                "DayOfWeek",
+                appointment.ScheduleID
+            );
 
             if (role == "Patient")
             {
                 var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserID == userId);
+
                 ViewBag.PatientName = patient?.Name ?? userName;
                 ViewBag.PatientID = patient?.PatientID;
             }
@@ -158,8 +178,17 @@ namespace MediConnectMVC.Controllers
                 return NotFound();
 
             ViewBag.DoctorID = new SelectList(_context.Doctors, "DoctorID", "Name", appointment.DoctorID);
+
             ViewBag.PatientID = new SelectList(_context.Patients, "PatientID", "Name", appointment.PatientID);
-            ViewBag.ScheduleID = new SelectList(_context.Schedules, "ScheduleID", "DayOfWeek", appointment.ScheduleID);
+
+            ViewBag.ScheduleID = new SelectList(
+                _context.Schedules
+                    .GroupBy(s => s.DayOfWeek)
+                    .Select(g => g.First()),
+                "ScheduleID",
+                "DayOfWeek",
+                appointment.ScheduleID
+            );
 
             return View(appointment);
         }
@@ -176,17 +205,6 @@ namespace MediConnectMVC.Controllers
             ModelState.Remove("Patient");
             ModelState.Remove("Doctor");
             ModelState.Remove("Schedule");
-
-            bool isDoubleBooked = await _context.Appointments.AnyAsync(a =>
-                a.DoctorID == appointment.DoctorID &&
-                a.ScheduleID == appointment.ScheduleID &&
-                a.AppointmentDate == appointment.AppointmentDate &&
-                a.AppointmentID != appointment.AppointmentID);
-
-            if (isDoubleBooked)
-            {
-                ModelState.AddModelError("", "This doctor is already booked at this time.");
-            }
 
             if (ModelState.IsValid)
             {
@@ -215,8 +233,17 @@ namespace MediConnectMVC.Controllers
             }
 
             ViewBag.DoctorID = new SelectList(_context.Doctors, "DoctorID", "Name", appointment.DoctorID);
+
             ViewBag.PatientID = new SelectList(_context.Patients, "PatientID", "Name", appointment.PatientID);
-            ViewBag.ScheduleID = new SelectList(_context.Schedules, "ScheduleID", "DayOfWeek", appointment.ScheduleID);
+
+            ViewBag.ScheduleID = new SelectList(
+                _context.Schedules
+                    .GroupBy(s => s.DayOfWeek)
+                    .Select(g => g.First()),
+                "ScheduleID",
+                "DayOfWeek",
+                appointment.ScheduleID
+            );
 
             return View(appointment);
         }
@@ -253,30 +280,25 @@ namespace MediConnectMVC.Controllers
 
             if (appointment != null)
             {
-                // Delete notifications first
                 var notifications = _context.Notifications
                     .Where(n => n.AppointmentID == id);
 
                 _context.Notifications.RemoveRange(notifications);
 
-                // Delete medical records linked to appointment
                 var medicalRecords = _context.MedicalRecords
                     .Where(m => m.AppointmentID == id)
                     .ToList();
 
                 foreach (var record in medicalRecords)
                 {
-                    // Delete prescriptions linked to medical record
                     var prescriptions = _context.Prescriptions
                         .Where(p => p.RecordID == record.RecordID);
 
                     _context.Prescriptions.RemoveRange(prescriptions);
                 }
 
-                // Delete medical records
                 _context.MedicalRecords.RemoveRange(medicalRecords);
 
-                // Finally delete appointment
                 _context.Appointments.Remove(appointment);
 
                 await _context.SaveChangesAsync();

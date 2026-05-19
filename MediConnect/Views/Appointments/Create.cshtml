@@ -17,15 +17,13 @@
 
     <div class="mb-3">
         <label>Status</label>
-        <select asp-for="Status" class="form-control">
-            <option>Requested</option>
-            <option>Confirmed</option>
-            <option>Checked-In</option>
-            <option>In Progress</option>
-            <option>Completed</option>
-            <option>Cancelled</option>
-            <option>Missed</option>
-        </select>
+
+        <input asp-for="Status"
+               value="Requested"
+               class="form-control"
+               readonly />
+
+        <input type="hidden" asp-for="Status" value="Requested" />
     </div>
 
     <div class="mb-3">

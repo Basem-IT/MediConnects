@@ -4,11 +4,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - MediConnect</title>
+
     <script type="importmap"></script>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/MediConnect.styles.css" asp-append-version="true" />
 </head>
+
 <body>
 
     @if (!(ViewContext.RouteData.Values["controller"]?.ToString() == "Account"))
@@ -16,97 +19,123 @@
         var role = Context.Session.GetString("Role");
 
         <header>
-            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-                <div class="container-fluid">
+
+            <nav class="navbar navbar-expand-lg modern-navbar fixed-top">
+
+                <div class="container-fluid px-4">
 
                     <a class="navbar-brand d-flex align-items-center"
-                       asp-area=""
                        asp-controller="Home"
                        asp-action="Index">
+
                         <img src="/Images/logoMediConnect.png"
                              alt="MediConnect Logo"
-                             style="height:75px; width:auto; margin-right:18px; display:block;" />
+                             style="height:65px; width:auto;" />
                     </a>
 
-                    <button class="navbar-toggler" type="button"
+                    <button class="navbar-toggler border-0 shadow-none"
+                            type="button"
                             data-bs-toggle="collapse"
-                            data-bs-target=".navbar-collapse">
+                            data-bs-target="#mainNavbar">
+
                         <span class="navbar-toggler-icon"></span>
                     </button>
 
-                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <div class="collapse navbar-collapse"
+                         id="mainNavbar">
 
-                        <ul class="navbar-nav flex-grow-1">
+                        <ul class="navbar-nav mx-auto gap-2">
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
+                                <a class="nav-link modern-link"
+                                   asp-controller="Home"
+                                   asp-action="Index">
+                                    Home
+                                </a>
                             </li>
 
                             @if (role == "Clinic Manager")
                             {
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Doctors" asp-action="Index">Doctors</a></li>
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Patients" asp-action="Index">Patients</a></li>
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Schedules" asp-action="Index">Schedules</a></li>
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Appointments" asp-action="Index">Appointments</a></li>
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Notifications" asp-action="Index">Notifications</a></li>
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="MedicalRecords" asp-action="Index">Medical Records</a></li>
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Doctors" asp-action="Index">Doctors</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Patients" asp-action="Index">Patients</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Schedules" asp-action="Index">Schedules</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Appointments" asp-action="Index">Appointments</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Notifications" asp-action="Index">Notifications</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="MedicalRecords" asp-action="Index">Medical Records</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a></li>
                             }
                             else if (role == "Receptionist")
                             {
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Patients" asp-action="Index">Patients</a></li>
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Schedules" asp-action="Index">Schedules</a></li>
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Appointments" asp-action="Index">Appointments</a></li>
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Notifications" asp-action="Index">Notifications</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Patients" asp-action="Index">Patients</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Schedules" asp-action="Index">Schedules</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Appointments" asp-action="Index">Appointments</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Notifications" asp-action="Index">Notifications</a></li>
                             }
                             else if (role == "Doctor")
                             {
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Schedules" asp-action="Index">Schedules</a></li>
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Appointments" asp-action="Index">Appointments</a></li>
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Notifications" asp-action="Index">Notifications</a></li>
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="MedicalRecords" asp-action="Index">Medical Records</a></li>
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Schedules" asp-action="Index">Schedules</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Appointments" asp-action="Index">Appointments</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Notifications" asp-action="Index">Notifications</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="MedicalRecords" asp-action="Index">Medical Records</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a></li>
                             }
                             else if (role == "Patient")
                             {
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Appointments" asp-action="Index">Appointments</a></li>
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Notifications" asp-action="Index">Notifications</a></li>
-                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Appointments" asp-action="Index">Appointments</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Notifications" asp-action="Index">Notifications</a></li>
+                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a></li>
                             }
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                                <a class="nav-link modern-link"
+                                   asp-controller="Home"
+                                   asp-action="Privacy">
+                                    Privacy
+                                </a>
                             </li>
 
                         </ul>
 
                         @if (Context.Session.GetString("UserName") != null)
                         {
-                            <div class="dropdown ms-auto">
-                                <button class="btn rounded-circle"
+                            <div class="dropdown ms-lg-4">
+
+                                <button class="profile-btn"
                                         type="button"
-                                        data-bs-toggle="dropdown"
-                                        style="width:45px; height:45px; background:#ff4fa3; color:white; font-weight:bold; margin:auto;">
+                                        data-bs-toggle="dropdown">
+
                                     @Context.Session.GetString("UserName")?.Substring(0, 1).ToUpper()
+
                                 </button>
 
-                                <ul class="dropdown-menu dropdown-menu-end p-3" style="width:260px;">
-                                    <li><strong>Hello, @Context.Session.GetString("UserName")</strong></li>
-                                    <li class="text-muted">Role: @Context.Session.GetString("Role")</li>
+                                <ul class="dropdown-menu dropdown-menu-end modern-dropdown">
+
+                                    <li class="px-3 pt-2">
+                                        <strong>@Context.Session.GetString("UserName")</strong>
+                                    </li>
+
+                                    <li class="px-3 text-muted small">
+                                        @Context.Session.GetString("Role")
+                                    </li>
+
                                     <li><hr class="dropdown-divider" /></li>
 
                                     <li>
-                                        <a class="dropdown-item" asp-controller="Account" asp-action="Profile">Edit Info</a>
+                                        <a class="dropdown-item"
+                                           asp-controller="Account"
+                                           asp-action="Profile">
+                                            Edit Profile
+                                        </a>
                                     </li>
 
                                     <li>
                                         <a class="dropdown-item text-danger"
                                            asp-controller="Account"
-                                           asp-action="Logout"
-                                           onclick="return confirm('Are you sure you want to logout?');">
+                                           asp-action="Logout">
                                             Logout
                                         </a>
                                     </li>
+
                                 </ul>
                             </div>
                         }
@@ -114,6 +143,7 @@
                     </div>
                 </div>
             </nav>
+
         </header>
     }
 
@@ -126,7 +156,10 @@
     <footer class="border-top footer text-muted">
         <div class="container">
             &copy; 2026 - MediConnect -
-            <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <a asp-controller="Home"
+               asp-action="Privacy">
+                Privacy
+            </a>
         </div>
     </footer>
 
