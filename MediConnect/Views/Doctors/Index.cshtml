@@ -1,0 +1,35 @@
+﻿@model IEnumerable<MediConnectAPI.Models.Doctor>
+
+<h1>Doctors</h1>
+
+<a asp-action="Create" class="btn btn-primary mb-3">Add Doctor</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Doctor ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Qualification</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var doctor in Model)
+        {
+            <tr>
+                <td>@doctor.DoctorID</td>
+                <td>@doctor.Name</td>
+                <td>@doctor.Email</td>
+                <td>@doctor.Phone</td>
+                <td>@doctor.Qualification</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@doctor.DoctorID" class="btn btn-warning btn-sm">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@doctor.DoctorID" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

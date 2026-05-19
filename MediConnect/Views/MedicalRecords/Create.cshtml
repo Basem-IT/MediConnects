@@ -1,0 +1,43 @@
+﻿@model MediConnectAPI.Models.MedicalRecord
+
+<h1>Add Medical Record</h1>
+
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label>Appointment</label>
+        <select asp-for="AppointmentID" class="form-control" asp-items="ViewBag.AppointmentID"></select>
+    </div>
+
+    <div class="mb-3">
+        <label>Doctor</label>
+        <select asp-for="DoctorID" class="form-control" asp-items="ViewBag.DoctorID"></select>
+    </div>
+
+    <div class="mb-3">
+        <label>Patient</label>
+        <select asp-for="PatientID" class="form-control" asp-items="ViewBag.PatientID"></select>
+    </div>
+
+    <div class="mb-3">
+        <label>Created Date</label>
+        <input asp-for="CreatedDate" type="datetime-local" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Diagnosis</label>
+        <input asp-for="Diagnosis" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Doctor Notes</label>
+        <textarea asp-for="DoctorNotes" class="form-control"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label>Visit Summary</label>
+        <textarea asp-for="VisitSummary" class="form-control"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+</form>

@@ -1,0 +1,35 @@
+﻿@{
+    ViewData["Title"] = "Live Appointment Tracking";
+}
+
+<h1>Live Appointment Tracking -_-</h1>
+<p>This page will show appointment status updates.</p>
+<table class="table">
+  <thead>
+        <tr>
+            <th>Time</th>
+            <th>Patient</th>
+            <th>Doctor</th>
+            <th>Status</th>
+        </tr>
+  </thead>
+  <tbody>
+     <tr id="appointment-1">
+            <td>9:00 AM</td>
+            <td>Test Patient</td>
+            <td>Test Doctor</td>
+            <td class="status-cell">Confirmed</td>
+     </tr>
+  </tbody>
+    <button id="testUpdateBtn" class="btn btn-primary mb-3">
+        Test Status Update
+    </button>
+
+    <a asp-controller="AppointmentTracking" asp-action="TestUpdate" class="btn btn-success mb-3">
+        Server Test Update
+    </a>
+
+</table>
+@section Scripts {
+    <script src="~/js/appointment-live.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,40 @@
+﻿@model MediConnectMVC.ViewModels.RegisterViewModel
+
+<h1>Register</h1>
+
+<form asp-action="Register" method="post">
+
+    <div class="mb-3">
+        <label>Username</label>
+        <input asp-for="UserName" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Password</label>
+        <input asp-for="Password" type="password" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Confirm Password</label>
+        <input asp-for="ConfirmPassword" type="password" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Role</label>
+        <input type="hidden" asp-for="RoleName" value="Patient" />
+
+        <div class="mb-3">
+            <label>Role</label>
+            <input value="Patient" class="form-control" readonly />
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Register</button>
+    <a asp-action="Login" class="btn btn-secondary">Back to Login</a>
+
+</form>
+
+@if (ViewBag.Error != null)
+{
+    <div class="text-danger mt-3">@ViewBag.Error</div>
+}

@@ -1,0 +1,40 @@
+﻿@model IEnumerable<MediConnectMVC.Models.Notification>
+
+@{
+    ViewData["Title"] = "Notifications";
+}
+
+<h1>Notifications</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Message</th>
+            <th>Appointment ID</th>
+            <th>Date</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var notification in Model)
+        {
+            <tr>
+                <td>@notification.Type</td>
+                <td>@notification.Message</td>
+                <td>@notification.AppointmentID</td>
+                <td>@notification.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>
+                    @if (notification.IsRead)
+                    {
+                        <span class="badge bg-secondary">Read</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-primary">Unread</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

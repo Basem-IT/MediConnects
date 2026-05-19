@@ -1,0 +1,31 @@
+﻿@model MediConnectAPI.Models.Schedule
+
+<h1>Delete Schedule</h1>
+
+<h3>Are you sure you want to delete this schedule?</h3>
+
+<div class="mb-3">
+    <strong>Doctor:</strong> @Model.Doctor?.Name
+</div>
+
+<div class="mb-3">
+    <strong>Day:</strong> @Model.DayOfWeek
+</div>
+
+<div class="mb-3">
+    <strong>Start Time:</strong> @Model.StartTime
+</div>
+
+<div class="mb-3">
+    <strong>End Time:</strong> @Model.EndTime
+</div>
+
+<form asp-action="Delete">
+
+    <input type="hidden" asp-for="ScheduleID" />
+
+    <button type="submit" class="btn btn-danger">Delete</button>
+
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+
+</form>

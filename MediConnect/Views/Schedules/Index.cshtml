@@ -1,0 +1,47 @@
+﻿@model IEnumerable<MediConnectAPI.Models.Schedule>
+
+<h1>Schedules</h1>
+
+<a asp-action="Create" class="btn btn-primary mb-3">Add Schedule</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Schedule ID</th>
+            <th>Doctor</th>
+            <th>Day</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Available</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var schedule in Model)
+        {
+            <tr>
+                <td>@schedule.ScheduleID</td>
+                <td>@schedule.Doctor?.Name</td>
+                <td>@schedule.DayOfWeek</td>
+                <td>@schedule.StartTime</td>
+                <td>@schedule.EndTime</td>
+                <td>@schedule.IsAvailable</td>
+
+                <td>
+                    <a asp-action="Edit"
+                       asp-route-id="@schedule.ScheduleID"
+                       class="btn btn-warning btn-sm">
+                        Edit
+                    </a>
+
+                    <a asp-action="Delete"
+                       asp-route-id="@schedule.ScheduleID"
+                       class="btn btn-danger btn-sm">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

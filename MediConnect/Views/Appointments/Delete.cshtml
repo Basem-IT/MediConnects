@@ -1,0 +1,34 @@
+﻿@model MediConnectAPI.Models.Appointment
+
+<h1>Delete Appointment</h1>
+
+<h3>Are you sure you want to delete this appointment?</h3>
+
+<div class="mb-3">
+    <strong>Date:</strong> @Model.AppointmentDate
+</div>
+
+<div class="mb-3">
+    <strong>Reason:</strong> @Model.Reason
+</div>
+
+<div class="mb-3">
+    <strong>Status:</strong> @Model.Status
+</div>
+
+<div class="mb-3">
+    <strong>Doctor:</strong> @Model.Doctor?.Name
+</div>
+
+<div class="mb-3">
+    <strong>Patient:</strong> @Model.Patient?.Name
+</div>
+
+<form asp-action="Delete">
+
+    <input type="hidden" asp-for="AppointmentID" />
+
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+
+</form>

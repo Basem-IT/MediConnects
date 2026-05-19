@@ -1,0 +1,50 @@
+﻿@model MediConnectAPI.Models.Appointment
+
+<h1>Edit Appointment</h1>
+
+<form asp-action="Edit" method="post">
+
+    <input type="hidden" asp-for="AppointmentID" />
+
+    <div class="mb-3">
+        <label>Appointment Date</label>
+        <input asp-for="AppointmentDate" type="datetime-local" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Reason</label>
+        <input asp-for="Reason" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Status</label>
+        <select asp-for="Status" class="form-control">
+            <option>Requested</option>
+            <option>Confirmed</option>
+            <option>Checked-In</option>
+            <option>In Progress</option>
+            <option>Completed</option>
+            <option>Cancelled</option>
+            <option>Missed</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label>Doctor</label>
+        <select asp-for="DoctorID" class="form-control" asp-items="ViewBag.DoctorID"></select>
+    </div>
+
+    <div class="mb-3">
+        <label>Patient</label>
+        <select asp-for="PatientID" class="form-control" asp-items="ViewBag.PatientID"></select>
+    </div>
+
+    <div class="mb-3">
+        <label>Schedule</label>
+        <select asp-for="ScheduleID" class="form-control" asp-items="ViewBag.ScheduleID"></select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+
+</form>
