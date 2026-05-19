@@ -5,9 +5,11 @@ using MediConnectAPI.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using MediConnectMVC.Hubs;
 using Microsoft.AspNetCore.SignalR;
+using MediConnectMVC.Filters;
 
 namespace MediConnectMVC.Controllers
 {
+    [SessionAuthorize]
     public class AppointmentsController : Controller
     {
         private readonly MediConnectDbContext _context;

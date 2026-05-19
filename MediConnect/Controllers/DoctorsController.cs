@@ -2,10 +2,11 @@
 using MediConnectAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using MediConnectMVC.Filters;
 
 namespace MediConnectMVC.Controllers
 {
+    [SessionAuthorize]
     public class DoctorsController : Controller
     {
         private readonly MediConnectDbContext _context;

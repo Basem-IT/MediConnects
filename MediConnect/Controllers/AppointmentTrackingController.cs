@@ -1,9 +1,11 @@
 ﻿using MediConnectMVC.Hubs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using MediConnectMVC.Filters;
 
 namespace MediConnectMVC.Controllers
 {
+    [SessionAuthorize]
     public class AppointmentTrackingController : Controller
     {
         private readonly IHubContext<AppointmentHub> _hubContext;
