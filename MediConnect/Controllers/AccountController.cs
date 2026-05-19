@@ -1,8 +1,9 @@
 ﻿using MediConnectAPI.Data;
+using MediConnectAPI.Models;
+using MediConnectMVC.Filters;
 using MediConnectMVC.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MediConnectMVC.Filters;
 
 namespace MediConnectMVC.Controllers
 {
@@ -37,6 +38,7 @@ namespace MediConnectMVC.Controllers
 
             HttpContext.Session.SetString("UserName", user.UserName);
             HttpContext.Session.SetString("Role", user.Role?.RoleName ?? "");
+            HttpContext.Session.SetInt32("UserID", user.UserID);
 
             return RedirectToAction("Index", "Home");
         }
@@ -88,6 +90,19 @@ namespace MediConnectMVC.Controllers
             };
 
             _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            var patient = new Patient
+            {
+                Name = model.FullName,
+                Email = model.Email,
+                CPR = model.CPR,
+                Phone = model.Phone,
+                DOB = model.DOB,
+                UserID = user.UserID
+            };
+
+            _context.Patients.Add(patient);
             await _context.SaveChangesAsync();
 
             return RedirectToAction("Login");

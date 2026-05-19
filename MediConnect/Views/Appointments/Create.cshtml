@@ -2,6 +2,8 @@
 
 <h1>Add Appointment</h1>
 
+<div asp-validation-summary="All" class="text-danger"></div>
+
 <form asp-action="Create" method="post">
     <div class="mb-3">
         <label>Appointment Date</label>
@@ -31,10 +33,20 @@
         <select asp-for="DoctorID" class="form-control" asp-items="ViewBag.DoctorID"></select>
     </div>
 
-    <div class="mb-3">
-        <label>Patient</label>
-        <select asp-for="PatientID" class="form-control" asp-items="ViewBag.PatientID"></select>
-    </div>
+    @if (ViewBag.Role == "Patient")
+    {
+        <div class="mb-3">
+            <label>Patient</label>
+            <input value="@ViewBag.PatientName" class="form-control" readonly />
+        </div>
+    }
+    else
+    {
+        <div class="mb-3">
+            <label>Patient</label>
+            <select asp-for="PatientID" class="form-control" asp-items="ViewBag.PatientID"></select>
+        </div>
+    }
 
     <div class="mb-3">
         <label>Schedule</label>
