@@ -16,6 +16,7 @@
             <th>Status</th>
         </tr>
     </thead>
+
     <tbody>
         @foreach (var notification in Model)
         {
@@ -24,6 +25,7 @@
                 <td>@notification.Message</td>
                 <td>@notification.AppointmentID</td>
                 <td>@notification.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+
                 <td>
                     @if (notification.IsRead)
                     {

@@ -21,12 +21,37 @@
 
     <div class="mb-3">
         <label>Role</label>
-        <input type="hidden" asp-for="RoleName" value="Patient" />
+        <select asp-for="RoleName" class="form-control">
+            <option value="Patient">Patient</option>
+            <option value="Doctor">Doctor</option>
+            <option value="Receptionist">Receptionist</option>
+            <option value="Clinic Manager">Clinic Manager</option>
+        </select>
+    </div>
 
-        <div class="mb-3">
-            <label>Role</label>
-            <input value="Patient" class="form-control" readonly />
-        </div>
+    <div class="mb-3">
+        <label>Full Name</label>
+        <input asp-for="FullName" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Email</label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>CPR</label>
+        <input asp-for="CPR" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Phone</label>
+        <input asp-for="Phone" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Date of Birth</label>
+        <input asp-for="DOB" type="date" class="form-control" />
     </div>
 
     <button type="submit" class="btn btn-primary">Register</button>

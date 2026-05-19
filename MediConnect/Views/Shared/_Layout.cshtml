@@ -13,8 +13,9 @@
 
     @if (!(ViewContext.RouteData.Values["controller"]?.ToString() == "Account"))
     {
-        <header>
+        var role = Context.Session.GetString("Role");
 
+        <header>
             <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
                 <div class="container-fluid">
 
@@ -22,19 +23,14 @@
                        asp-area=""
                        asp-controller="Home"
                        asp-action="Index">
-
                         <img src="/Images/logoMediConnect.png"
                              alt="MediConnect Logo"
                              style="height:75px; width:auto; margin-right:18px; display:block;" />
-
                     </a>
 
                     <button class="navbar-toggler" type="button"
                             data-bs-toggle="collapse"
-                            data-bs-target=".navbar-collapse"
-                            aria-controls="navbarSupportedContent"
-                            aria-expanded="false"
-                            aria-label="Toggle navigation">
+                            data-bs-target=".navbar-collapse">
                         <span class="navbar-toggler-icon"></span>
                     </button>
 
@@ -43,77 +39,43 @@
                         <ul class="navbar-nav flex-grow-1">
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-area=""
-                                   asp-controller="Home"
-                                   asp-action="Index">
-                                    Home
-                                </a>
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
                             </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Doctors"
-                                   asp-action="Index">
-                                    Doctors
-                                </a>
-                            </li>
+                            @if (role == "Clinic Manager")
+                            {
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Doctors" asp-action="Index">Doctors</a></li>
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Patients" asp-action="Index">Patients</a></li>
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Schedules" asp-action="Index">Schedules</a></li>
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Appointments" asp-action="Index">Appointments</a></li>
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Notifications" asp-action="Index">Notifications</a></li>
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="MedicalRecords" asp-action="Index">Medical Records</a></li>
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a></li>
+                            }
+                            else if (role == "Receptionist")
+                            {
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Patients" asp-action="Index">Patients</a></li>
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Schedules" asp-action="Index">Schedules</a></li>
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Appointments" asp-action="Index">Appointments</a></li>
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Notifications" asp-action="Index">Notifications</a></li>
+                            }
+                            else if (role == "Doctor")
+                            {
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Schedules" asp-action="Index">Schedules</a></li>
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Appointments" asp-action="Index">Appointments</a></li>
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Notifications" asp-action="Index">Notifications</a></li>
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="MedicalRecords" asp-action="Index">Medical Records</a></li>
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a></li>
+                            }
+                            else if (role == "Patient")
+                            {
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Appointments" asp-action="Index">Appointments</a></li>
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Notifications" asp-action="Index">Notifications</a></li>
+                                <li class="nav-item"><a class="nav-link text-dark" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a></li>
+                            }
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Patients"
-                                   asp-action="Index">
-                                    Patients
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Schedules"
-                                   asp-action="Index">
-                                    Schedules
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Appointments"
-                                   asp-action="Index">
-                                    Appointments
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Notifications"
-                                   asp-action="Index">
-                                    Notifications
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="MedicalRecords"
-                                   asp-action="Index">
-                                    Medical Records
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Prescriptions"
-                                   asp-action="Index">
-                                    Prescriptions
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-area=""
-                                   asp-controller="Home"
-                                   asp-action="Privacy">
-                                    Privacy
-                                </a>
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="Privacy">Privacy</a>
                             </li>
 
                         </ul>
@@ -129,22 +91,12 @@
                                 </button>
 
                                 <ul class="dropdown-menu dropdown-menu-end p-3" style="width:260px;">
-                                    <li>
-                                        <strong>Hello, @Context.Session.GetString("UserName")</strong>
-                                    </li>
-
-                                    <li class="text-muted">
-                                        Role: @Context.Session.GetString("Role")
-                                    </li>
-
+                                    <li><strong>Hello, @Context.Session.GetString("UserName")</strong></li>
+                                    <li class="text-muted">Role: @Context.Session.GetString("Role")</li>
                                     <li><hr class="dropdown-divider" /></li>
 
                                     <li>
-                                        <a class="dropdown-item"
-                                           asp-controller="Account"
-                                           asp-action="Profile">
-                                            Edit Info
-                                        </a>
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="Profile">Edit Info</a>
                                     </li>
 
                                     <li>
@@ -174,7 +126,7 @@
     <footer class="border-top footer text-muted">
         <div class="container">
             &copy; 2026 - MediConnect -
-            <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <a asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
 

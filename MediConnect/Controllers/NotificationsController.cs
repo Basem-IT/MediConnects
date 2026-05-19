@@ -5,6 +5,7 @@ using MediConnectMVC.Filters;
 namespace MediConnectMVC.Controllers
 {
     [SessionAuthorize]
+    [RoleAuthorize("Clinic Manager", "Receptionist", "Doctor", "Patient")]
     public class NotificationsController : Controller
     {
         public IActionResult Index()
