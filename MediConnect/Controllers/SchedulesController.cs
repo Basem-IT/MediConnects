@@ -92,7 +92,35 @@ namespace MediConnectMVC.Controllers
 
             if (schedule != null)
             {
+                var appointments = _context.Appointments
+                    .Where(a => a.ScheduleID == id)
+                    .ToList();
+
+                foreach (var appointment in appointments)
+                {
+                    var notifications = _context.Notifications
+                        .Where(n => n.AppointmentID == appointment.AppointmentID);
+
+                    _context.Notifications.RemoveRange(notifications);
+
+                    var medicalRecords = _context.MedicalRecords
+                        .Where(m => m.AppointmentID == appointment.AppointmentID)
+                        .ToList();
+
+                    foreach (var record in medicalRecords)
+                    {
+                        var prescriptions = _context.Prescriptions
+                            .Where(p => p.RecordID == record.RecordID);
+
+                        _context.Prescriptions.RemoveRange(prescriptions);
+                    }
+
+                    _context.MedicalRecords.RemoveRange(medicalRecords);
+                }
+
+                _context.Appointments.RemoveRange(appointments);
                 _context.Schedules.Remove(schedule);
+
                 await _context.SaveChangesAsync();
             }
 

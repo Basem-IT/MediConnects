@@ -14,7 +14,11 @@
             <th>Doctor</th>
             <th>Patient</th>
             <th>Schedule Day</th>
-            <th>Actions</th>
+
+            @if (Context.Session.GetString("Role") != "Patient")
+            {
+                <th>Actions</th>
+            }
         </tr>
     </thead>
 
@@ -30,19 +34,22 @@
                 <td>@appointment.Patient?.Name</td>
                 <td>@appointment.Schedule?.DayOfWeek</td>
 
-                <td>
-                    <a asp-action="Edit"
-                       asp-route-id="@appointment.AppointmentID"
-                       class="btn btn-warning btn-sm">
-                        Edit
-                    </a>
+                @if (Context.Session.GetString("Role") != "Patient")
+                {
+                    <td>
+                        <a asp-action="Edit"
+                           asp-route-id="@appointment.AppointmentID"
+                           class="btn btn-warning btn-sm">
+                            Edit
+                        </a>
 
-                    <a asp-action="Delete"
-                       asp-route-id="@appointment.AppointmentID"
-                       class="btn btn-danger btn-sm">
-                        Delete
-                    </a>
-                </td>
+                        <a asp-action="Delete"
+                           asp-route-id="@appointment.AppointmentID"
+                           class="btn btn-danger btn-sm">
+                            Delete
+                        </a>
+                    </td>
+                }
             </tr>
         }
     </tbody>

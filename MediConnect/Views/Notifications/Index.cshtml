@@ -1,5 +1,4 @@
-﻿@model IEnumerable<MediConnectMVC.Models.Notification>
-
+﻿@model IEnumerable<MediConnectAPI.Models.Notification>
 @{
     ViewData["Title"] = "Notifications";
 }
@@ -11,9 +10,10 @@
         <tr>
             <th>Type</th>
             <th>Message</th>
-            <th>Appointment ID</th>
+            <th>Appointment</th>
             <th>Date</th>
             <th>Status</th>
+            <th>Action</th>
         </tr>
     </thead>
 
@@ -22,9 +22,16 @@
         {
             <tr>
                 <td>@notification.Type</td>
+
                 <td>@notification.Message</td>
-                <td>@notification.AppointmentID</td>
-                <td>@notification.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+
+                <td>
+                    Appointment #@notification.AppointmentID
+                </td>
+
+                <td>
+                    @notification.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                </td>
 
                 <td>
                     @if (notification.IsRead)
@@ -34,6 +41,17 @@
                     else
                     {
                         <span class="badge bg-primary">Unread</span>
+                    }
+                </td>
+
+                <td>
+                    @if (!notification.IsRead)
+                    {
+                        <a asp-action="MarkAsRead"
+                           asp-route-id="@notification.NotificationID"
+                           class="btn btn-success btn-sm">
+                            Mark as Read
+                        </a>
                     }
                 </td>
             </tr>
