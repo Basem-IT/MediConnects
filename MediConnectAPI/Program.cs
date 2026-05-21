@@ -71,7 +71,7 @@ builder.Services.AddSwaggerGen(options =>
     {
         Title = "MediConnect API",
         Version = "v1",
-        Description = "Healthcare Clinic Appointment & Resource System — IT8118 Group Project"
+        Description = "Healthcare Clinic Appointment & Resource System ï¿½ IT8118 Group Project"
     });
 
     // This adds the green "Authorize" button to Swagger UI.

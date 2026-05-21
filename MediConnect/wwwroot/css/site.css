@@ -1,31 +1,168 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #ff4fa3;
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+    padding-top: 95px;
+    background: #f7f8fc;
+    font-family: "Segoe UI", sans-serif;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+/* Floating labels */
+.form-floating > .form-control-plaintext::placeholder,
+.form-floating > .form-control::placeholder {
+    color: var(--bs-secondary-color);
+    text-align: end;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+.form-floating > .form-control-plaintext:focus::placeholder,
+.form-floating > .form-control:focus::placeholder {
+    text-align: start;
+}
+
+/* MODERN NAVBAR */
+
+.modern-navbar {
+    background: rgba(255,255,255,0.78);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.modern-link {
+    position: relative;
+    font-weight: 600;
+    color: #1d1d1d !important;
+    transition: all 0.3s ease;
+    padding: 10px 16px !important;
+    border-radius: 12px;
+}
+
+    .modern-link:hover {
+        color: #ff4fa3 !important;
+        background: rgba(255,79,163,0.08);
+    }
+
+    .modern-link::after {
+        content: "";
+        position: absolute;
+        left: 14px;
+        bottom: 6px;
+        width: 0%;
+        height: 2px;
+        background: #ff4fa3;
+        transition: 0.3s;
+        border-radius: 10px;
+    }
+
+    .modern-link:hover::after {
+        width: 60%;
+    }
+
+/* PROFILE BUTTON */
+
+.profile-btn {
+    width: 50px;
+    height: 50px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg,#ff4fa3,#ff7dc1);
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    box-shadow: 0 10px 25px rgba(255,79,163,0.3);
+    transition: all 0.3s ease;
+}
+
+    .profile-btn:hover {
+        transform: scale(1.08);
+    }
+
+/* DROPDOWN */
+
+.modern-dropdown {
+    border: none;
+    border-radius: 18px;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+    padding: 10px;
+    min-width: 220px;
+}
+
+/* TABLES */
+
+.table {
+    background: white;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.04);
+}
+
+    .table th {
+        background: #fff0f7;
+        color: #ff4fa3;
+        font-weight: 700;
+    }
+
+/* BUTTONS */
+
+.btn-primary {
+    background: linear-gradient(135deg,#ff4fa3,#ff7dc1);
+    border: none;
+    border-radius: 12px;
+}
+
+    .btn-primary:hover {
+        opacity: 0.9;
+    }
+
+.btn-warning {
+    border-radius: 10px;
+}
+
+.btn-danger {
+    border-radius: 10px;
+}
+
+.btn-success {
+    border-radius: 10px;
+}
+
+/* CARDS / CONTAINERS */
+
+.container {
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

@@ -1,0 +1,56 @@
+﻿@model MediConnectAPI.Models.Appointment
+
+<h1>Add Appointment</h1>
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label>Appointment Date</label>
+        <input asp-for="AppointmentDate" type="datetime-local" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Reason</label>
+        <input asp-for="Reason" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Status</label>
+
+        <input asp-for="Status"
+               value="Requested"
+               class="form-control"
+               readonly />
+
+        <input type="hidden" asp-for="Status" value="Requested" />
+    </div>
+
+    <div class="mb-3">
+        <label>Doctor</label>
+        <select asp-for="DoctorID" class="form-control" asp-items="ViewBag.DoctorID"></select>
+    </div>
+
+    @if (ViewBag.Role == "Patient")
+    {
+        <div class="mb-3">
+            <label>Patient</label>
+            <input value="@ViewBag.PatientName" class="form-control" readonly />
+        </div>
+    }
+    else
+    {
+        <div class="mb-3">
+            <label>Patient</label>
+            <select asp-for="PatientID" class="form-control" asp-items="ViewBag.PatientID"></select>
+        </div>
+    }
+
+    <div class="mb-3">
+        <label>Schedule</label>
+        <select asp-for="ScheduleID" class="form-control" asp-items="ViewBag.ScheduleID"></select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+</form>

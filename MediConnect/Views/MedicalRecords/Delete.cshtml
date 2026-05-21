@@ -1,0 +1,17 @@
+﻿@model MediConnectAPI.Models.MedicalRecord
+
+<h1>Delete Medical Record</h1>
+
+<h3>Are you sure you want to delete this medical record?</h3>
+
+<p><strong>Patient:</strong> @Model.Patient?.Name</p>
+<p><strong>Doctor:</strong> @Model.Doctor?.Name</p>
+<p><strong>Diagnosis:</strong> @Model.Diagnosis</p>
+<p><strong>Visit Summary:</strong> @Model.VisitSummary</p>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="RecordID" />
+
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

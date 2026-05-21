@@ -1,9 +1,11 @@
 using System.Diagnostics;
 using MediConnect.Models;
 using Microsoft.AspNetCore.Mvc;
+using MediConnectMVC.Filters;
 
-namespace MediConnect.Controllers
+namespace MediConnectMVC.Controllers
 {
+    [SessionAuthorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;

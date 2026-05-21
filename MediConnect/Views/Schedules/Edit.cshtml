@@ -1,0 +1,45 @@
+﻿@model MediConnectAPI.Models.Schedule
+
+<h1>Edit Schedule</h1>
+
+<form asp-action="Edit" method="post">
+
+    <input type="hidden" asp-for="ScheduleID" />
+
+    <div class="mb-3">
+        <label>Doctor</label>
+        <select asp-for="DoctorID"
+                class="form-control"
+                asp-items="ViewBag.DoctorID">
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label>Day Of Week</label>
+        <input asp-for="DayOfWeek" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Start Time</label>
+        <input asp-for="StartTime"
+               type="datetime-local"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>End Time</label>
+        <input asp-for="EndTime"
+               type="datetime-local"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3 form-check">
+        <input asp-for="IsAvailable" class="form-check-input" />
+        <label class="form-check-label">Available</label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+
+</form>

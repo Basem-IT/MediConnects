@@ -1,0 +1,56 @@
+﻿@model IEnumerable<MediConnectAPI.Models.Appointment>
+
+<h1>Appointments</h1>
+
+<a asp-action="Create" class="btn btn-primary mb-3">Add Appointment</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Appointment ID</th>
+            <th>Date</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Doctor</th>
+            <th>Patient</th>
+            <th>Schedule Day</th>
+
+            @if (Context.Session.GetString("Role") != "Patient")
+            {
+                <th>Actions</th>
+            }
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var appointment in Model)
+        {
+            <tr>
+                <td>@appointment.AppointmentID</td>
+                <td>@appointment.AppointmentDate</td>
+                <td>@appointment.Reason</td>
+                <td>@appointment.Status</td>
+                <td>@appointment.Doctor?.Name</td>
+                <td>@appointment.Patient?.Name</td>
+                <td>@appointment.Schedule?.DayOfWeek</td>
+
+                @if (Context.Session.GetString("Role") != "Patient")
+                {
+                    <td>
+                        <a asp-action="Edit"
+                           asp-route-id="@appointment.AppointmentID"
+                           class="btn btn-warning btn-sm">
+                            Edit
+                        </a>
+
+                        <a asp-action="Delete"
+                           asp-route-id="@appointment.AppointmentID"
+                           class="btn btn-danger btn-sm">
+                            Delete
+                        </a>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>

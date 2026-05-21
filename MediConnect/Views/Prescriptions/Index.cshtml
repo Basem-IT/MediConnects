@@ -1,0 +1,59 @@
+﻿@model IEnumerable<MediConnectAPI.Models.Prescription>
+
+<h1>Prescriptions</h1>
+
+@if (Context.Session.GetString("Role") != "Patient")
+{
+    <a asp-action="Create" class="btn btn-primary mb-3">Add Prescription</a>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Prescription ID</th>
+            <th>Medication</th>
+            <th>Dosage</th>
+            <th>Frequency</th>
+            <th>Duration</th>
+            <th>Instructions</th>
+            <th>Medical Record ID</th>
+
+            @if (Context.Session.GetString("Role") != "Patient")
+            {
+                <th>Actions</th>
+            }
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var prescription in Model)
+        {
+            <tr>
+                <td>@prescription.PrescriptionID</td>
+                <td>@prescription.MedicationName</td>
+                <td>@prescription.Dosage</td>
+                <td>@prescription.Frequency</td>
+                <td>@prescription.Duration</td>
+                <td>@prescription.Instructions</td>
+                <td>@prescription.RecordID</td>
+
+                @if (Context.Session.GetString("Role") != "Patient")
+                {
+                    <td>
+                        <a asp-action="Edit"
+                           asp-route-id="@prescription.PrescriptionID"
+                           class="btn btn-warning btn-sm">
+                            Edit
+                        </a>
+
+                        <a asp-action="Delete"
+                           asp-route-id="@prescription.PrescriptionID"
+                           class="btn btn-danger btn-sm">
+                            Delete
+                        </a>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
