@@ -1,30 +1,18 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace MediConnectAPI.Models
+﻿namespace MediConnectAPI.Models
 {
     public class Patient
     {
-        [Key]
         public int PatientID { get; set; }
-
-        public int CPR { get; set; }
-
-        public DateTime DOB { get; set; }
-
-        public string Email { get; set; } = string.Empty;
-
         public string Name { get; set; } = string.Empty;
-
+        public int CPR { get; set; }
+        public DateTime DOB { get; set; }
+        public string Email { get; set; } = string.Empty;
         public int Phone { get; set; }
 
-        public int? UserID { get; set; }
+        // Added by Student 2 for the public appointment lookup feature, which is generated automatically when a patient is registered. In the format: "PAT-0001", "PAT-0002", etc.
+        public string ReferenceCode { get; set; } = string.Empty;
 
-        [ForeignKey("UserID")]
-        public User? User { get; set; }
-
-        public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
-
-        public ICollection<MedicalRecord> MedicalRecords { get; set; } = new List<MedicalRecord>();
+        public ICollection<Appointment>? Appointments { get; set; }
+        public ICollection<MedicalRecord>? MedicalRecords { get; set; }
     }
 }

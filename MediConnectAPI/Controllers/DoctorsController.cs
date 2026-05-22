@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediConnectAPI.Data;
+using MediConnectAPI.DTOs;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MediConnectAPI.Data;
-using MediConnectAPI.Models;
 
 namespace MediConnectAPI.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class DoctorsController : ControllerBase
     {
         private readonly MediConnectDbContext _context;
@@ -16,67 +17,124 @@ namespace MediConnectAPI.Controllers
             _context = context;
         }
 
-        // GET: api/doctors
+        // GET /api/doctors
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Doctor>>> GetDoctors()
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<DoctorResponseDto>>> GetDoctors(
+            [FromQuery] int? specializationID)
         {
-            return await _context.Doctors.ToListAsync();
+            var query = _context.Doctors
+                .Include(d => d.DoctorSpecializations)
+                    .ThenInclude(ds => ds.Specialization)
+                .AsQueryable();
+
+            if (specializationID.HasValue)
+                query = query.Where(d =>
+                    d.DoctorSpecializations.Any(ds =>
+                        ds.SpecializationID == specializationID));
+
+            var doctors = await query.ToListAsync();
+
+            return Ok(doctors.Select(d => new DoctorResponseDto
+            {
+                DoctorID = d.DoctorID,
+                Name = d.Name,
+                Email = d.Email,
+                Phone = d.Phone,
+                Qualification = d.Qualification,
+                Specializations = d.DoctorSpecializations
+                                   .Select(ds => ds.Specialization?.Name ?? string.Empty)
+                                   .ToList()
+            }));
         }
 
-        // GET: api/doctors/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Doctor>> GetDoctor(int id)
+        // GET /api/doctors/{id}
+        [HttpGet("{id:int}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<DoctorResponseDto>> GetDoctor(int id)
+        {
+            var d = await _context.Doctors
+                .Include(d => d.DoctorSpecializations)
+                    .ThenInclude(ds => ds.Specialization)
+                .FirstOrDefaultAsync(d => d.DoctorID == id);
+
+            if (d == null)
+                return NotFound(new { message = $"Doctor {id} not found" });
+
+            return Ok(new DoctorResponseDto
+            {
+                DoctorID = d.DoctorID,
+                Name = d.Name,
+                Email = d.Email,
+                Phone = d.Phone,
+                Qualification = d.Qualification,
+                Specializations = d.DoctorSpecializations
+                                   .Select(ds => ds.Specialization?.Name ?? string.Empty)
+                                   .ToList()
+            });
+        }
+
+        // GET /api/doctors/{id}/schedule
+        [HttpGet("{id:int}/schedule")]
+        [Authorize(Roles = "ClinicManager,Receptionist,Doctor,Patient")]
+        public async Task<ActionResult<DoctorScheduleDto>> GetDoctorSchedule(
+            int id,
+            [FromQuery] DateTime? from,
+            [FromQuery] DateTime? to)
         {
             var doctor = await _context.Doctors.FindAsync(id);
-
             if (doctor == null)
+                return NotFound(new { message = $"Doctor {id} not found" });
+
+            // Load all schedule slots for the specified doctor id
+            var schedules = await _context.Schedules
+                .Where(s => s.DoctorID == id)
+                .ToListAsync();
+
+            var fromDate = from?.Date ?? DateTime.UtcNow.Date;
+            var toDate = to?.Date ?? fromDate.AddDays(7);
+
+            // Load upcoming appointments in the date range
+            var appointments = await _context.Appointments
+                .Include(a => a.Patient)
+                .Include(a => a.Schedule)
+                .Where(a =>
+                    a.DoctorID == id &&
+                    a.AppointmentDate.Date >= fromDate &&
+                    a.AppointmentDate.Date <= toDate &&
+                    a.Status != "Cancelled" &&
+                    a.Status != "Missed")
+                .OrderBy(a => a.AppointmentDate)
+                .ToListAsync();
+
+            return Ok(new DoctorScheduleDto
             {
-                return NotFound();
-            }
-
-            return doctor;
-        }
-
-        // POST: api/doctors
-        [HttpPost]
-        public async Task<ActionResult<Doctor>> AddDoctor(Doctor doctor)
-        {
-            _context.Doctors.Add(doctor);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetDoctor), new { id = doctor.DoctorID }, doctor);
-        }
-
-        // PUT: api/doctors/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateDoctor(int id, Doctor doctor)
-        {
-            if (id != doctor.DoctorID)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(doctor).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        // DELETE: api/doctors/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDoctor(int id)
-        {
-            var doctor = await _context.Doctors.FindAsync(id);
-
-            if (doctor == null)
-            {
-                return NotFound();
-            }
-
-            _context.Doctors.Remove(doctor);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+                DoctorID = doctor.DoctorID,
+                DoctorName = doctor.Name,
+                Schedules = schedules.Select(s => new ScheduleSlotDto
+                {
+                    ScheduleID = s.ScheduleID,
+                    DayOfWeek = s.DayOfWeek,
+                    StartTime = s.StartTime.ToString("HH:mm"),
+                    EndTime = s.EndTime,
+                    IsAvailable = s.IsAvailable
+                }).ToList(),
+                UpcomingAppointments = appointments.Select(a => new AppointmentResponseDto
+                {
+                    AppointmentID = a.AppointmentID,
+                    AppointmentDate = a.AppointmentDate,
+                    Reason = a.Reason,
+                    Status = a.Status,
+                    DoctorID = a.DoctorID,
+                    DoctorName = doctor.Name,
+                    PatientID = a.PatientID,
+                    PatientName = a.Patient?.Name ?? string.Empty,
+                    ScheduleID = a.ScheduleID,
+                    DayOfWeek = a.Schedule?.DayOfWeek ?? string.Empty,
+                    StartTime = a.Schedule?.StartTime.ToString("HH:mm") ?? string.Empty,
+                    EndTime = a.Schedule?.EndTime ?? string.Empty
+                }).ToList()
+            });
         }
     }
 }

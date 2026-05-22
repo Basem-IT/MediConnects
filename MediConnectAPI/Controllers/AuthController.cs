@@ -1,71 +1,143 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using MediConnectAPI.Data;
+﻿using MediConnectAPI.Data;
+using MediConnectAPI.DTOs;
+using MediConnectAPI.Models;
+using MediConnectAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace MediConnectAPI.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly MediConnectDbContext _context;
-        private readonly IConfiguration _configuration;
+        private readonly ITokenService _tokenService;
+        private readonly IConfiguration _config;
 
-        public AuthController(MediConnectDbContext context, IConfiguration configuration)
+        public AuthController(
+            MediConnectDbContext context,
+            ITokenService tokenService,
+            IConfiguration config)
         {
             _context = context;
-            _configuration = configuration;
+            _tokenService = tokenService;
+            _config = config;
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginRequest request)
+        // POST /api/auth/register
+        [HttpPost("register")]
+        [AllowAnonymous]
+        public async Task<ActionResult<AuthResponseDto>> Register(RegisterDto dto)
         {
-            var user = await _context.Users
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u =>
-                    u.UserName == request.UserName &&
-                    u.Password == request.Password);
+            // Check if username is not already taken
+            var exists = await _context.Users
+                .AnyAsync(u => u.UserName == dto.UserName);
+            if (exists)
+                return Conflict(new { message = "Username already taken" });
 
-            if (user == null)
-                return Unauthorized("Invalid username or password.");
+            // Find the role by name, the roles are seeded inside the database
+            var role = await _context.Roles
+                .FirstOrDefaultAsync(r => r.RoleName == dto.RoleName);
+            if (role == null)
+                return BadRequest(new { message = $"Role '{dto.RoleName}' does not exist" });
 
-            if (user.Role.RoleName != "Clinic Manager")
-                return Forbid("Only Clinic Manager can access reports.");
+            // Hash the password using BCrypt which never stores plain text
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
-            var claims = new List<Claim>
+            var user = new User
             {
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.Role, user.Role.RoleName)
+                UserName = dto.UserName,
+                Password = hashedPassword,
+                RoleID = role.RoleID
             };
 
-            var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
 
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddHours(2),
-                signingCredentials: credentials);
-
-            return Ok(new
+            // If registring as a Patient, create the Patient record to
+            int? patientID = null;
+            if (dto.RoleName == "Patient")
             {
-                token = new JwtSecurityTokenHandler().WriteToken(token),
-                role = user.Role.RoleName,
-                username = user.UserName
+                // Ensure patient fields are provided
+                if (string.IsNullOrEmpty(dto.PatientName) || dto.CPR == null)
+                    return BadRequest(new { message = "PatientName and CPR are required for Patient registration" });
+
+                // Count existing patients to generate a unique reference code
+                var patientCount = await _context.Patients.CountAsync();
+                var referenceCode = $"PAT-{(patientCount + 1):D4}"; 
+
+                var patient = new Patient
+                {
+                    Name = dto.PatientName,
+                    CPR = dto.CPR.Value,
+                    DOB = dto.DOB ?? DateTime.UtcNow,
+                    Email = dto.Email ?? string.Empty,
+                    Phone = dto.Phone ?? 0,
+                    ReferenceCode = referenceCode
+                };
+
+                _context.Patients.Add(patient);
+                await _context.SaveChangesAsync();
+                patientID = patient.PatientID;
+            }
+
+            // Load the Role navigation property before  generating the token
+            user.Role = role;
+            var token = _tokenService.CreateToken(user);
+            var expiryMinutes = int.Parse(_config["Jwt:ExpiryMinutes"] ?? "60");
+
+            return Ok(new AuthResponseDto
+            {
+                Token = token,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(expiryMinutes),
+                UserName = user.UserName,
+                Role = role.RoleName,
+                PatientID = patientID
             });
         }
-    }
 
-    public class LoginRequest
-    {
-        public string UserName { get; set; } = "";
-        public string Password { get; set; } = "";
+        // POST /api/auth/login
+        [HttpPost("login")]
+        [AllowAnonymous]
+        public async Task<ActionResult<AuthResponseDto>> Login(LoginDto dto)
+        {
+            // Load user with Role so we can put the role name in the token
+            var user = await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.UserName == dto.UserName);
+
+            // Use a generic message — don't reveal whether username or password was wrong
+            if (user == null)
+                return Unauthorized(new { message = "Invalid username or password" });
+
+            // Verify the BCrypt hash
+            var passwordValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.Password);
+            if (!passwordValid)
+                return Unauthorized(new { message = "Invalid username or password" });
+
+            // Check if this user has a linked Patient record
+            int? patientID = null;
+            if (user.Role?.RoleName == "Patient")
+            {
+                // Match patient by username (email is used as username for patients)
+                var patient = await _context.Patients
+                    .FirstOrDefaultAsync(p => p.Email == dto.UserName);
+                patientID = patient?.PatientID;
+            }
+
+            var token = _tokenService.CreateToken(user);
+            var expiryMinutes = int.Parse(_config["Jwt:ExpiryMinutes"] ?? "60");
+
+            return Ok(new AuthResponseDto
+            {
+                Token = token,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(expiryMinutes),
+                UserName = user.UserName,
+                Role = user.Role?.RoleName ?? string.Empty,
+                PatientID = patientID
+            });
+        }
     }
 }
