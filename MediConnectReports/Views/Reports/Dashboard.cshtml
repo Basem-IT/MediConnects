@@ -1,0 +1,97 @@
+﻿@model DashboardViewModel
+
+<h2>Clinic Manager Reports Dashboard</h2>
+
+<p>
+    <a asp-controller="Auth" asp-action="Logout">Logout</a>
+</p>
+
+<div class="cards">
+    <div class="card">
+        <h3>Total</h3>
+        <h2>@Model.Statistics.TotalAppointments</h2>
+    </div>
+
+    <div class="card">
+        <h3>Completed</h3>
+        <h2>@Model.Statistics.CompletedAppointments</h2>
+    </div>
+
+    <div class="card">
+        <h3>Cancelled</h3>
+        <h2>@Model.Statistics.CancelledAppointments</h2>
+    </div>
+
+    <div class="card">
+        <h3>Missed</h3>
+        <h2>@Model.Statistics.MissedAppointments</h2>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Missed Appointment Rate</h3>
+    <p>@Model.MissedRate.MissedRate%</p>
+</div>
+
+<div class="card">
+    <h3>Doctor Utilization</h3>
+
+    <table>
+        <tr>
+            <th>Doctor</th>
+            <th>Appointments</th>
+        </tr>
+
+        @foreach (var item in Model.DoctorUtilization)
+        {
+            <tr>
+                <td>@item.DoctorName</td>
+                <td>@item.AppointmentCount</td>
+            </tr>
+        }
+    </table>
+</div>
+
+<div class="card">
+    <h3>Appointments By Status</h3>
+
+    <table>
+        <tr>
+            <th>Status</th>
+            <th>Count</th>
+        </tr>
+
+        @foreach (var item in Model.AppointmentsByStatus)
+        {
+            <tr>
+                <td>@item.Status</td>
+                <td>@item.Count</td>
+            </tr>
+        }
+    </table>
+</div>
+
+<div class="card">
+    <h3>Recent Appointments</h3>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Date</th>
+            <th>Doctor</th>
+            <th>Patient</th>
+            <th>Status</th>
+        </tr>
+
+        @foreach (var item in Model.RecentAppointments)
+        {
+            <tr>
+                <td>@item.AppointmentId</td>
+                <td>@item.AppointmentDate.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@item.DoctorName</td>
+                <td>@item.PatientName</td>
+                <td>@item.Status</td>
+            </tr>
+        }
+    </table>
+</div>

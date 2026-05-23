@@ -1,7 +1,8 @@
 using System.Diagnostics;
 using MediConnect.Models;
-using Microsoft.AspNetCore.Mvc;
+using MediConnectAPI.Data;
 using MediConnectMVC.Filters;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MediConnectMVC.Controllers
 {
@@ -9,14 +10,19 @@ namespace MediConnectMVC.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly MediConnectDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, MediConnectDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         public IActionResult Index()
         {
+            ViewBag.UnreadNotifications = _context.Notifications
+                .Count(n => !n.IsRead);
+
             return View();
         }
 

@@ -60,7 +60,25 @@
                                 <li class="nav-item"><a class="nav-link modern-link" asp-controller="Patients" asp-action="Index">Patients</a></li>
                                 <li class="nav-item"><a class="nav-link modern-link" asp-controller="Schedules" asp-action="Index">Schedules</a></li>
                                 <li class="nav-item"><a class="nav-link modern-link" asp-controller="Appointments" asp-action="Index">Appointments</a></li>
-                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Notifications" asp-action="Index">Notifications</a></li>
+                                <li class="nav-item position-relative">
+
+                                    <a class="nav-link modern-link"
+                                       asp-controller="Notifications"
+                                       asp-action="Index">
+
+                                        Notifications
+
+                                        @if (ViewBag.UnreadNotifications != null &&
+                                                                        (int)ViewBag.UnreadNotifications > 0)
+                                        {
+                                            <span class="notification-badge">
+                                                @ViewBag.UnreadNotifications
+                                            </span>
+                                        }
+
+                                    </a>
+
+                                </li>
                                 <li class="nav-item"><a class="nav-link modern-link" asp-controller="MedicalRecords" asp-action="Index">Medical Records</a></li>
                                 <li class="nav-item"><a class="nav-link modern-link" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a></li>
                             }
@@ -69,20 +87,74 @@
                                 <li class="nav-item"><a class="nav-link modern-link" asp-controller="Patients" asp-action="Index">Patients</a></li>
                                 <li class="nav-item"><a class="nav-link modern-link" asp-controller="Schedules" asp-action="Index">Schedules</a></li>
                                 <li class="nav-item"><a class="nav-link modern-link" asp-controller="Appointments" asp-action="Index">Appointments</a></li>
-                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Notifications" asp-action="Index">Notifications</a></li>
-                            }
+                                <li class="nav-item position-relative">
+
+                                    <a class="nav-link modern-link"
+                                       asp-controller="Notifications"
+                                       asp-action="Index">
+
+                                        Notifications
+
+                                        @if (ViewBag.UnreadNotifications != null &&
+                                                                        (int)ViewBag.UnreadNotifications > 0)
+                                        {
+                                            <span class="notification-badge">
+                                                @ViewBag.UnreadNotifications
+                                            </span>
+                                        }
+
+                                    </a>
+
+                                </li>
+                                }
                             else if (role == "Doctor")
                             {
                                 <li class="nav-item"><a class="nav-link modern-link" asp-controller="Schedules" asp-action="Index">Schedules</a></li>
                                 <li class="nav-item"><a class="nav-link modern-link" asp-controller="Appointments" asp-action="Index">Appointments</a></li>
-                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Notifications" asp-action="Index">Notifications</a></li>
+                                <li class="nav-item position-relative">
+
+                                    <a class="nav-link modern-link"
+                                       asp-controller="Notifications"
+                                       asp-action="Index">
+
+                                        Notifications
+
+                                        @if (ViewBag.UnreadNotifications != null &&
+                                                                        (int)ViewBag.UnreadNotifications > 0)
+                                        {
+                                            <span class="notification-badge">
+                                                @ViewBag.UnreadNotifications
+                                            </span>
+                                        }
+
+                                    </a>
+
+                                </li>
                                 <li class="nav-item"><a class="nav-link modern-link" asp-controller="MedicalRecords" asp-action="Index">Medical Records</a></li>
                                 <li class="nav-item"><a class="nav-link modern-link" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a></li>
                             }
                             else if (role == "Patient")
                             {
                                 <li class="nav-item"><a class="nav-link modern-link" asp-controller="Appointments" asp-action="Index">Appointments</a></li>
-                                <li class="nav-item"><a class="nav-link modern-link" asp-controller="Notifications" asp-action="Index">Notifications</a></li>
+                                <li class="nav-item position-relative">
+
+                                    <a class="nav-link modern-link"
+                                       asp-controller="Notifications"
+                                       asp-action="Index">
+
+                                        Notifications
+
+                                        @if (ViewBag.UnreadNotifications != null &&
+                                                                        (int)ViewBag.UnreadNotifications > 0)
+                                        {
+                                            <span class="notification-badge">
+                                                @ViewBag.UnreadNotifications
+                                            </span>
+                                        }
+
+                                    </a>
+
+                                </li>
                                 <li class="nav-item"><a class="nav-link modern-link" asp-controller="Prescriptions" asp-action="Index">Prescriptions</a></li>
                             }
 
