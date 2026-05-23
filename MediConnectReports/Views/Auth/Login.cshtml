@@ -1,0 +1,20 @@
+﻿@model LoginViewModel
+
+<div class="card" style="max-width:400px; margin:auto;">
+    <h2>Clinic Manager Login</h2>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <p class="error">@Model.ErrorMessage</p>
+    }
+
+    <form asp-action="Login" method="post">
+        <label>Username</label>
+        <input asp-for="UserName" />
+
+        <label>Password</label>
+        <input asp-for="Password" type="password" />
+
+        <button type="submit">Login</button>
+    </form>
+</div>
