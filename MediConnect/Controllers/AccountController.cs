@@ -27,8 +27,13 @@ namespace MediConnectMVC.Controllers
             var user = await _context.Users
                 .Include(u => u.Role)
                 .FirstOrDefaultAsync(u =>
-                    u.UserName == model.UserName &&
-                    u.Password == model.Password);
+                   u.UserName == model.UserName);
+
+            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
+            {
+                ViewBag.Error = "Invalid username or password";
+                return View(model);
+            }
 
             if (user == null)
             {
@@ -85,7 +90,7 @@ namespace MediConnectMVC.Controllers
             var user = new MediConnectAPI.Models.User
             {
                 UserName = model.UserName,
-                Password = model.Password,
+                Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
                 RoleID = role.RoleID
             };
 

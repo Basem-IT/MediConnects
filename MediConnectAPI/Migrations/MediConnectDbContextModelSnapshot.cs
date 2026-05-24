@@ -58,7 +58,7 @@ namespace MediConnectAPI.Migrations
 
                     b.HasIndex("ScheduleID");
 
-                    b.ToTable("Appointments");
+                    b.ToTable("Appointments", (string)null);
                 });
 
             modelBuilder.Entity("MediConnectAPI.Models.Doctor", b =>
@@ -87,7 +87,7 @@ namespace MediConnectAPI.Migrations
 
                     b.HasKey("DoctorID");
 
-                    b.ToTable("Doctors");
+                    b.ToTable("Doctors", (string)null);
                 });
 
             modelBuilder.Entity("MediConnectAPI.Models.DoctorSpecialization", b =>
@@ -110,7 +110,7 @@ namespace MediConnectAPI.Migrations
 
                     b.HasIndex("SpecializationID");
 
-                    b.ToTable("DoctorSpecializations");
+                    b.ToTable("DoctorSpecializations", (string)null);
                 });
 
             modelBuilder.Entity("MediConnectAPI.Models.MedicalRecord", b =>
@@ -153,7 +153,7 @@ namespace MediConnectAPI.Migrations
 
                     b.HasIndex("PatientID");
 
-                    b.ToTable("MedicalRecords");
+                    b.ToTable("MedicalRecords", (string)null);
                 });
 
             modelBuilder.Entity("MediConnectAPI.Models.Notification", b =>
@@ -185,7 +185,7 @@ namespace MediConnectAPI.Migrations
 
                     b.HasIndex("AppointmentID");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("MediConnectAPI.Models.Patient", b =>
@@ -217,14 +217,9 @@ namespace MediConnectAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("UserID")
-                        .HasColumnType("int");
-
                     b.HasKey("PatientID");
 
-                    b.HasIndex("UserID");
-
-                    b.ToTable("Patients");
+                    b.ToTable("Patients", (string)null);
                 });
 
             modelBuilder.Entity("MediConnectAPI.Models.Prescription", b =>
@@ -261,7 +256,7 @@ namespace MediConnectAPI.Migrations
 
                     b.HasIndex("RecordID");
 
-                    b.ToTable("Prescriptions");
+                    b.ToTable("Prescriptions", (string)null);
                 });
 
             modelBuilder.Entity("MediConnectAPI.Models.Role", b =>
@@ -278,7 +273,7 @@ namespace MediConnectAPI.Migrations
 
                     b.HasKey("RoleID");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("MediConnectAPI.Models.Schedule", b =>
@@ -310,7 +305,7 @@ namespace MediConnectAPI.Migrations
 
                     b.HasIndex("DoctorID");
 
-                    b.ToTable("Schedules");
+                    b.ToTable("Schedules", (string)null);
                 });
 
             modelBuilder.Entity("MediConnectAPI.Models.Specialization", b =>
@@ -331,7 +326,7 @@ namespace MediConnectAPI.Migrations
 
                     b.HasKey("SpecializationID");
 
-                    b.ToTable("Specializations");
+                    b.ToTable("Specializations", (string)null);
                 });
 
             modelBuilder.Entity("MediConnectAPI.Models.Staff", b =>
@@ -364,7 +359,7 @@ namespace MediConnectAPI.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Staffs");
+                    b.ToTable("Staffs", (string)null);
                 });
 
             modelBuilder.Entity("MediConnectAPI.Models.User", b =>
@@ -390,7 +385,7 @@ namespace MediConnectAPI.Migrations
 
                     b.HasIndex("RoleID");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("MediConnectAPI.Models.Appointment", b =>
@@ -475,15 +470,6 @@ namespace MediConnectAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Appointment");
-                });
-
-            modelBuilder.Entity("MediConnectAPI.Models.Patient", b =>
-                {
-                    b.HasOne("MediConnectAPI.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MediConnectAPI.Models.Prescription", b =>
