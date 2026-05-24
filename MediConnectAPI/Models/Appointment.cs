@@ -26,6 +26,9 @@ namespace MediConnectAPI.Models
         [ForeignKey("PatientID")]
         public virtual Patient? Patient { get; set; }
 
+        public int? UserID { get; set; }
+        public User? User { get; set; }
+
         [ForeignKey("ScheduleID")]
         public virtual Schedule? Schedule { get; set; }
 
