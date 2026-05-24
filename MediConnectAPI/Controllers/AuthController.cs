@@ -112,7 +112,7 @@ namespace MediConnectAPI.Controllers
             if (user == null)
                 return Unauthorized(new { message = "Invalid username or password" });
 
-            if (user.Password != dto.Password)
+            if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
                 return Unauthorized(new { message = "Invalid username or password" });
 
             // Check if this user has a linked Patient record

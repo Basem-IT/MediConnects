@@ -126,4 +126,6 @@ app.UseAuthorization();  // Evaluates [Authorize] attributes against the HttpCon
 
 app.MapControllers();
 
+app.Urls.Clear();
+app.Urls.Add("http://localhost:5050");
 app.Run();

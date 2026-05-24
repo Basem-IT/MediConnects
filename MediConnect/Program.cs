@@ -47,4 +47,7 @@ app.MapControllerRoute(
 
 app.MapHub<AppointmentHub>("/hubs/appointments");
 
+app.Urls.Clear();
+app.Urls.Add("http://localhost:5069");
+
 app.Run();
