@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Numerics;
 
+// that is the data to get andset
 namespace MediConnectAPI.Data
 {
     public class MediConnectDbContext : DbContext

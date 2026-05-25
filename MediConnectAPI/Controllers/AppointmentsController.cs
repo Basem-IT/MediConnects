@@ -9,7 +9,7 @@ namespace MediConnectAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // All actions need a valid JWT unless [AllowAnonymous] is set
+    [Authorize]
     public class AppointmentsController : ControllerBase
     {
         private readonly MediConnectDbContext _context;
@@ -19,7 +19,8 @@ namespace MediConnectAPI.Controllers
             _context = context;
         }
 
-        // ENDPOINT 1: GET /api/appointments
+        // gets all appointments
+        // can also filter by doctor, patient, status or date
         [HttpGet]
         [Authorize(Roles = "ClinicManager,Receptionist,Doctor,Patient")]
         public async Task<ActionResult<IEnumerable<AppointmentResponseDto>>> GetAppointments(
@@ -34,9 +35,19 @@ namespace MediConnectAPI.Controllers
                 .Include(a => a.Schedule)
                 .AsQueryable();
 
-            if (doctorID.HasValue) query = query.Where(a => a.DoctorID == doctorID);
-            if (patientID.HasValue) query = query.Where(a => a.PatientID == patientID);
-            if (date.HasValue) query = query.Where(a => a.AppointmentDate.Date == date.Value.Date);
+            // filter by doctor id
+            if (doctorID.HasValue)
+                query = query.Where(a => a.DoctorID == doctorID);
+
+            // filter by patient id
+            if (patientID.HasValue)
+                query = query.Where(a => a.PatientID == patientID);
+
+            // filter by appointment date
+            if (date.HasValue)
+                query = query.Where(a => a.AppointmentDate.Date == date.Value.Date);
+
+            // filter by status
             if (!string.IsNullOrEmpty(status))
                 query = query.Where(a => a.Status == status);
 
@@ -47,7 +58,7 @@ namespace MediConnectAPI.Controllers
             return Ok(list.Select(MapToDto));
         }
 
-        // ENDPOINT 2: GET /api/appointments/{id} 
+        // gets one appointment using the id
         [HttpGet("{id:int}")]
         [Authorize(Roles = "ClinicManager,Receptionist,Doctor,Patient")]
         public async Task<ActionResult<AppointmentResponseDto>> GetAppointment(int id)
@@ -58,19 +69,20 @@ namespace MediConnectAPI.Controllers
                 .Include(a => a.Schedule)
                 .FirstOrDefaultAsync(a => a.AppointmentID == id);
 
+            // checks if appointment exists
             if (a == null)
                 return NotFound(new { message = $"Appointment {id} not found" });
 
             return Ok(MapToDto(a));
         }
 
-        // ENDPOINT 3: POST /api/appointments
+        // creates a new appointment
         [HttpPost]
         [Authorize(Roles = "ClinicManager,Receptionist,Patient")]
         public async Task<ActionResult<AppointmentResponseDto>> CreateAppointment(
             CreateAppointmentDto dto)
         {
-            // Checks that the schedule slot exists and belongs to the right doctor
+            // checks if the schedule belongs to the doctor
             var schedule = await _context.Schedules
                 .FirstOrDefaultAsync(s =>
                     s.ScheduleID == dto.ScheduleID &&
@@ -79,10 +91,11 @@ namespace MediConnectAPI.Controllers
             if (schedule == null)
                 return NotFound(new { message = "Schedule slot not found for this doctor" });
 
+            // checks if slot is available
             if (!schedule.IsAvailable)
                 return Conflict(new { message = "This schedule slot is not available" });
 
-            // Prevents double-booking: same doctor, same schedule slot, same date
+            // prevents booking the same slot twice
             var alreadyBooked = await _context.Appointments.AnyAsync(a =>
                 a.DoctorID == dto.DoctorID &&
                 a.ScheduleID == dto.ScheduleID &&
@@ -91,14 +104,17 @@ namespace MediConnectAPI.Controllers
                 a.Status != "Missed");
 
             if (alreadyBooked)
+            {
                 return Conflict(new
                 {
                     message = "This time slot is already booked for the selected date"
                 });
+            }
 
-            // Checks that patient exists
+            // checks if patient exists
             var patientExists = await _context.Patients
                 .AnyAsync(p => p.PatientID == dto.PatientID);
+
             if (!patientExists)
                 return NotFound(new { message = $"Patient {dto.PatientID} not found" });
 
@@ -109,13 +125,14 @@ namespace MediConnectAPI.Controllers
                 ScheduleID = dto.ScheduleID,
                 AppointmentDate = dto.AppointmentDate,
                 Reason = dto.Reason,
-                Status = "Requested" 
+                Status = "Requested"
             };
 
             _context.Appointments.Add(appointment);
+
             await _context.SaveChangesAsync();
 
-            // Reload navigation properties for the response
+            // loads related data after saving
             await _context.Entry(appointment).Reference(a => a.Doctor).LoadAsync();
             await _context.Entry(appointment).Reference(a => a.Patient).LoadAsync();
             await _context.Entry(appointment).Reference(a => a.Schedule).LoadAsync();
@@ -126,35 +143,41 @@ namespace MediConnectAPI.Controllers
                 MapToDto(appointment));
         }
 
-        // ENDPOINT 4: PUT /api/appointments/{id}/status
+        // updates appointment status
         [HttpPut("{id:int}/status")]
         [Authorize(Roles = "ClinicManager,Receptionist,Doctor")]
         public async Task<IActionResult> UpdateStatus(int id, UpdateStatusDto dto)
         {
             var appointment = await _context.Appointments.FindAsync(id);
+
+            // checks if appointment exists
             if (appointment == null)
                 return NotFound(new { message = $"Appointment {id} not found" });
 
-            // Validate the transition is legal
+            // checks if status change is valid
             if (!IsValidTransition(appointment.Status, dto.Status))
+            {
                 return BadRequest(new
                 {
                     message = $"Cannot change status from '{appointment.Status}' to '{dto.Status}'"
                 });
+            }
 
             appointment.Status = dto.Status;
+
             await _context.SaveChangesAsync();
 
-            return NoContent(); 
+            return NoContent();
         }
 
-        // GET /api/appointments/{id}/medical-records
+        // gets medical records linked to an appointment
         [HttpGet("{id:int}/medical-records")]
         [Authorize(Roles = "ClinicManager,Doctor,Patient")]
         public async Task<ActionResult<IEnumerable<MedicalRecordResponseDto>>> GetMedicalRecords(int id)
         {
             var appointmentExists = await _context.Appointments
                 .AnyAsync(a => a.AppointmentID == id);
+
             if (!appointmentExists)
                 return NotFound(new { message = $"Appointment {id} not found" });
 
@@ -173,6 +196,7 @@ namespace MediConnectAPI.Controllers
                 VisitSummary = m.VisitSummary,
                 AppointmentID = m.AppointmentID,
                 DoctorName = m.Doctor?.Name ?? string.Empty,
+
                 Prescriptions = m.Prescriptions.Select(p => new PrescriptionResponseDto
                 {
                     PrescriptionID = p.PrescriptionID,
@@ -185,10 +209,7 @@ namespace MediConnectAPI.Controllers
             }));
         }
 
-        // Helpers 
-
-        // Maps a full Appointment entity to the flat DTO we send to clients.
-        // Navigation properties must be loaded before calling this.
+        // converts appointment object into dto
         private static AppointmentResponseDto MapToDto(Appointment a) => new()
         {
             AppointmentID = a.AppointmentID,
@@ -205,7 +226,7 @@ namespace MediConnectAPI.Controllers
             EndTime = a.Schedule?.EndTime ?? string.Empty
         };
 
-        // Valid status transitions, any pair not listed here is rejected with Response code: 400.
+        // checks if status change is allowed
         private static bool IsValidTransition(string current, string next)
         {
             return (current, next) switch

@@ -11,20 +11,24 @@ namespace MediConnectAPI.Controllers
     [Authorize]
     public class PatientsController : ControllerBase
     {
+        // database connection object
         private readonly MediConnectDbContext _context;
 
+        // controller constructor
         public PatientsController(MediConnectDbContext context)
         {
             _context = context;
         }
 
-        // GET /api/patients
+        // endpoint to get all the patients
         [HttpGet]
         [Authorize(Roles = "ClinicManager,Receptionist")]
         public async Task<ActionResult<IEnumerable<PatientResponseDto>>> GetPatients()
         {
+            // getting all the patients from database
             var patients = await _context.Patients.ToListAsync();
 
+            // returning the patient data using dto
             return Ok(patients.Select(p => new PatientResponseDto
             {
                 PatientID = p.PatientID,
@@ -37,15 +41,19 @@ namespace MediConnectAPI.Controllers
             }));
         }
 
-        // GET /api/patients/{id}
+        // endpoint to get one patient by the id
         [HttpGet("{id:int}")]
         [Authorize(Roles = "ClinicManager,Receptionist,Doctor,Patient")]
         public async Task<ActionResult<PatientResponseDto>> GetPatient(int id)
         {
+            // searching patient using pk
             var p = await _context.Patients.FindAsync(id);
+
+            // check if patient exists
             if (p == null)
                 return NotFound(new { message = $"Patient {id} not found" });
 
+            // this return patient information
             return Ok(new PatientResponseDto
             {
                 PatientID = p.PatientID,
@@ -58,16 +66,19 @@ namespace MediConnectAPI.Controllers
             });
         }
 
-        // ENDPOINT 5: GET /api/patients/{id}/history
+        // to get patient history with appointments and medical records
         [HttpGet("{id:int}/history")]
         [Authorize(Roles = "ClinicManager,Receptionist,Doctor,Patient")]
         public async Task<ActionResult<PatientHistoryDto>> GetPatientHistory(int id)
         {
+            // finding patient by id
             var patient = await _context.Patients.FindAsync(id);
+
+            // returning the error if patient is not found
             if (patient == null)
                 return NotFound(new { message = $"Patient {id} not found" });
 
-            // Load appointments with doctor and schedule info
+            // getting appointments with doctor and schedule details
             var appointments = await _context.Appointments
                 .Include(a => a.Doctor)
                 .Include(a => a.Schedule)
@@ -75,7 +86,7 @@ namespace MediConnectAPI.Controllers
                 .OrderByDescending(a => a.AppointmentDate)
                 .ToListAsync();
 
-            // Load medical records with doctor and prescriptions
+            // getting medical records and prescriptions
             var records = await _context.MedicalRecords
                 .Include(m => m.Doctor)
                 .Include(m => m.Prescriptions)
@@ -83,6 +94,7 @@ namespace MediConnectAPI.Controllers
                 .OrderByDescending(m => m.CreatedDate)
                 .ToListAsync();
 
+            // returning patient history data
             return Ok(new PatientHistoryDto
             {
                 Patient = new PatientResponseDto
@@ -95,6 +107,8 @@ namespace MediConnectAPI.Controllers
                     Phone = patient.Phone,
                     ReferenceCode = patient.ReferenceCode
                 },
+
+                // converting appointment data into dto format
                 Appointments = appointments.Select(a => new AppointmentResponseDto
                 {
                     AppointmentID = a.AppointmentID,
@@ -110,6 +124,8 @@ namespace MediConnectAPI.Controllers
                     StartTime = a.Schedule?.StartTime.ToString("HH:mm") ?? string.Empty,
                     EndTime = a.Schedule?.EndTime ?? string.Empty
                 }).ToList(),
+
+                // converting medical records into dto objects
                 MedicalRecords = records.Select(m => new MedicalRecordResponseDto
                 {
                     RecordID = m.RecordID,
@@ -119,6 +135,8 @@ namespace MediConnectAPI.Controllers
                     VisitSummary = m.VisitSummary,
                     AppointmentID = m.AppointmentID,
                     DoctorName = m.Doctor?.Name ?? string.Empty,
+
+                    // get all prescriptions for each record
                     Prescriptions = m.Prescriptions.Select(p => new PrescriptionResponseDto
                     {
                         PrescriptionID = p.PrescriptionID,

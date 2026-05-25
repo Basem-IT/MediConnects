@@ -12,11 +12,13 @@ namespace MediConnectAPI.Controllers
     {
         private readonly MediConnectDbContext _context;
 
+        // get database access
         public ReportsController(MediConnectDbContext context)
         {
             _context = context;
         }
 
+        // total and status counts for appointments
         [HttpGet("appointment-statistics")]
         public async Task<IActionResult> AppointmentStatistics()
         {
@@ -34,6 +36,7 @@ namespace MediConnectAPI.Controllers
             });
         }
 
+        // shows you how many appointments each doctor have
         [HttpGet("doctor-utilization")]
         public async Task<IActionResult> DoctorUtilization()
         {
@@ -48,6 +51,7 @@ namespace MediConnectAPI.Controllers
             return Ok(data);
         }
 
+        // groups appointments by status, completed etc
         [HttpGet("appointments-by-status")]
         public async Task<IActionResult> AppointmentsByStatus()
         {
@@ -63,6 +67,7 @@ namespace MediConnectAPI.Controllers
             return Ok(data);
         }
 
+        // last 10 appointment in the system
         [HttpGet("recent-appointments")]
         public async Task<IActionResult> RecentAppointments()
         {
@@ -84,6 +89,7 @@ namespace MediConnectAPI.Controllers
             return Ok(data);
         }
 
+        // missed appointments
         [HttpGet("missed-rate")]
         public async Task<IActionResult> MissedRate()
         {

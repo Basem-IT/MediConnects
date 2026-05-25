@@ -8,7 +8,7 @@ namespace MediConnectAPI.Services
 {
     public interface ITokenService
     {
-        // Takes a User (with Role navigation property loaded) and returns a signed JWT string
+        // function to generate jwt token for a user
         string CreateToken(User user);
     }
 
@@ -16,6 +16,7 @@ namespace MediConnectAPI.Services
     {
         private readonly IConfiguration _config;
 
+        // get config values jwt settings from appsettings
         public TokenService(IConfiguration config)
         {
             _config = config;
@@ -23,30 +24,31 @@ namespace MediConnectAPI.Services
 
         public string CreateToken(User user)
         {
-            // Build claims which are checked by [Authorize] 
+            // the data we put inside the token
             var claims = new List<Claim>
             {
-                // sub: the user's unique ID
+                // user id inside token
                 new(JwtRegisteredClaimNames.Sub, user.UserID.ToString()),
 
-                // unique_name: the username (used for display)
+                // username for identification
                 new(JwtRegisteredClaimNames.UniqueName, user.UserName),
 
-                // jti: unique token ID (prevents token reuse attacks)
+                // random id for token uniqueness
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
 
-                // Role: what [Authorize(Roles = "Doctor")] checks against
-                // Role navigation property must be loaded before calling this
+                // user role used for authorize checks
                 new(ClaimTypes.Role, user.Role?.RoleName ?? "Patient")
             };
 
-            // Builds the signing keys from appsettings.json Jwt:Key
+            // creating a key from appsettings jwt secret
             var keyBytes = Encoding.UTF8.GetBytes(_config["Jwt:Key"]!);
             var key = new SymmetricSecurityKey(keyBytes);
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+            // token expiry time the default 60 mins if not set
             var expiryMinutes = int.Parse(_config["Jwt:ExpiryMinutes"] ?? "60");
 
+            // building the token
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
@@ -55,7 +57,7 @@ namespace MediConnectAPI.Services
                 signingCredentials: creds
             );
 
-            // Serializes strings to the compact "header.payload.signature" 
+            // convert token to string so it can be sent to client
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }

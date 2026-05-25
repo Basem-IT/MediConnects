@@ -8,23 +8,22 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Database
-// Connects to SQL Server using the conection string in appsettings.json
+// connect database using connection string from the appsettings
 builder.Services.AddDbContext<MediConnectDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// JWT Authentication
-// Reads JWT settings from the appsettings.json
+// jwt setup 
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
 var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
 
+// setting up authentication using the jwt tokens
 builder.Services
     .AddAuthentication(options =>
     {
-        // Sets JWT Bearer as 'default' which overrides cookie defaults
+        // telling app to use the jwt instead of the cookies
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -40,19 +39,17 @@ builder.Services
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,
             IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
-            ClockSkew = TimeSpan.Zero // No grace period making tokens expire exactly on time
+            ClockSkew = TimeSpan.Zero // token expires when it end the time
         };
     });
 
+// authorization
 builder.Services.AddAuthorization();
 
-// Application Services 
-// TokenService: scoped = one instance per HTTP request
+// register token service
 builder.Services.AddScoped<ITokenService, TokenService>();
 
-// CORS 
-// During deveopment: allows all origins so the MVC app and reporting app can call this API without CORS errors.
-// Before deploymnt: replace AllowAnyOrigin with the specific Azure URLs.
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -61,7 +58,7 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader());
 });
 
-// Controllers/Swagger 
+// add controllers the swagger for testing the api
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -71,12 +68,10 @@ builder.Services.AddSwaggerGen(options =>
     {
         Title = "MediConnect API",
         Version = "v1",
-        Description = "Healthcare Clinic Appointment & Resource System � IT8118 Group Project"
+        Description = "Healthcare Clinic System API"
     });
 
-    // This adds the green "Authorize" button to Swagger UI.
-    // After loging in via POST /api/auth/login, paste the token here and all subsequent requests will include Authorization: Bearer {token}
-
+    // adds the authorize button in swagger for jwt testing
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -84,7 +79,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Paste the JWT token from POST /api/auth/login"
+        Description = "Paste JWT token here"
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -103,11 +98,10 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// Build 
+// build app
 var app = builder.Build();
 
-// The Middleware Pipeline 
-// Order matters, UseAuthentication has to come before UseAuthorization
+// middleware pipeline has to be in order
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -121,11 +115,14 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 
-app.UseAuthentication(); // Reads the JWT from Authorization header and sets the HttpContext.User
-app.UseAuthorization();  // Evaluates [Authorize] attributes against the HttpContext.User
+// authentication first then authorization
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
+//url
 app.Urls.Clear();
 app.Urls.Add("http://localhost:5050");
+
 app.Run();

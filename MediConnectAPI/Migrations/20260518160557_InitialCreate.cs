@@ -38,7 +38,8 @@ namespace MediConnectAPI.Migrations
                     DOB = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Phone = table.Column<int>(type: "int", nullable: false),
-                    ReferenceCode = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ReferenceCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserID = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -343,41 +344,18 @@ namespace MediConnectAPI.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "DoctorSpecializations");
-
-            migrationBuilder.DropTable(
-                name: "Notifications");
-
-            migrationBuilder.DropTable(
-                name: "Prescriptions");
-
-            migrationBuilder.DropTable(
-                name: "Staffs");
-
-            migrationBuilder.DropTable(
-                name: "Specializations");
-
-            migrationBuilder.DropTable(
-                name: "MedicalRecords");
-
-            migrationBuilder.DropTable(
-                name: "Users");
-
-            migrationBuilder.DropTable(
-                name: "Appointments");
-
-            migrationBuilder.DropTable(
-                name: "Roles");
-
-            migrationBuilder.DropTable(
-                name: "Patients");
-
-            migrationBuilder.DropTable(
-                name: "Schedules");
-
-            migrationBuilder.DropTable(
-                name: "Doctors");
+            migrationBuilder.DropTable(name: "DoctorSpecializations");
+            migrationBuilder.DropTable(name: "Notifications");
+            migrationBuilder.DropTable(name: "Prescriptions");
+            migrationBuilder.DropTable(name: "Staffs");
+            migrationBuilder.DropTable(name: "Specializations");
+            migrationBuilder.DropTable(name: "MedicalRecords");
+            migrationBuilder.DropTable(name: "Users");
+            migrationBuilder.DropTable(name: "Appointments");
+            migrationBuilder.DropTable(name: "Roles");
+            migrationBuilder.DropTable(name: "Patients");
+            migrationBuilder.DropTable(name: "Schedules");
+            migrationBuilder.DropTable(name: "Doctors");
         }
     }
 }
