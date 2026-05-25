@@ -1,6 +1,6 @@
 ﻿namespace MediConnectAPI.DTOs
 {
-    // Patient profile info
+    // patient info return from api
     public class PatientResponseDto
     {
         public int PatientID { get; set; }
@@ -12,7 +12,7 @@
         public string ReferenceCode { get; set; } = string.Empty;
     }
 
-    // Full history: patient and all their appointments as well as their medical records
+    // patient details and their history = appointments and medical records
     public class PatientHistoryDto
     {
         public PatientResponseDto Patient { get; set; } = null!;
@@ -20,7 +20,7 @@
         public List<MedicalRecordResponseDto> MedicalRecords { get; set; } = new();
     }
 
-    // Medical record (for summary) 
+    // medical record data seen in history
     public class MedicalRecordResponseDto
     {
         public int RecordID { get; set; }
@@ -33,7 +33,7 @@
         public List<PrescriptionResponseDto> Prescriptions { get; set; } = new();
     }
 
-    // Prescription summary 
+    // prescription info for a medical record
     public class PrescriptionResponseDto
     {
         public int PrescriptionID { get; set; }
@@ -44,23 +44,23 @@
         public DateTime Duration { get; set; }
     }
 
-    // Public lookup: what unauthenticated users see 
-    // Intentionally limited to no emails and no full medical details
+    // request for public lookup = CPR and reference code
     public class PublicLookupRequestDto
     {
         public int CPR { get; set; }
         public string ReferenceCode { get; set; } = string.Empty;
     }
 
+    // response for public lookup, less info for privacy
     public class PublicLookupResponseDto
     {
-        // Only first name for privacy
+        // only first name is shown for privacy reasons
         public string PatientFirstName { get; set; } = string.Empty;
         public List<PublicAppointmentDto> UpcomingAppointments { get; set; } = new();
         public List<PublicVisitSummaryDto> RecentVisits { get; set; } = new();
     }
 
-    // Stripped-down appointment that is safe to show without logging in
+    // simple appointment info for public view
     public class PublicAppointmentDto
     {
         public int AppointmentID { get; set; }
@@ -70,7 +70,7 @@
         public string Status { get; set; } = string.Empty;
     }
 
-    // Stripped-down visit summary, diagnosis shown and detailed notes are not exposed
+    // simplee visit info 
     public class PublicVisitSummaryDto
     {
         public DateTime VisitDate { get; set; }

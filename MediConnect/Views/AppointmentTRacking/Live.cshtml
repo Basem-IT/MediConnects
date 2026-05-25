@@ -1,35 +1,35 @@
-﻿@{
+﻿@using MediConnectAPI.Models
+@model List<Appointment>
+@{
     ViewData["Title"] = "Live Appointment Tracking";
 }
 
-<h1>Live Appointment Tracking -_-</h1>
-<p>This page will show appointment status updates.</p>
-<table class="table">
-  <thead>
+<h2>Live Appointment Tracking</h2>
+
+<table class="table table-bordered">
+    <thead class="table-dark">
         <tr>
-            <th>Time</th>
+            <th>ID</th>
             <th>Patient</th>
             <th>Doctor</th>
+            <th>Date</th>
             <th>Status</th>
         </tr>
-  </thead>
-  <tbody>
-     <tr id="appointment-1">
-            <td>9:00 AM</td>
-            <td>Test Patient</td>
-            <td>Test Doctor</td>
-            <td class="status-cell">Confirmed</td>
-     </tr>
-  </tbody>
-    <button id="testUpdateBtn" class="btn btn-primary mb-3">
-        Test Status Update
-    </button>
-
-    <a asp-controller="AppointmentTracking" asp-action="TestUpdate" class="btn btn-success mb-3">
-        Server Test Update
-    </a>
-
+    </thead>
+    <tbody id="appointment-table">
+        @foreach (var a in Model)
+        {
+            <tr id="appointment-@a.AppointmentID">
+                <td>@a.AppointmentID</td>
+                <td>@a.Patient?.Name</td>
+                <td>@a.Doctor?.Name</td>
+                <td>@a.AppointmentDate.ToShortDateString()</td>
+                <td class="status-cell">@a.Status</td>
+            </tr>
+        }
+    </tbody>
 </table>
+
 @section Scripts {
     <script src="~/js/appointment-live.js" asp-append-version="true"></script>
 }

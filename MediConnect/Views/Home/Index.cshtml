@@ -1,8 +1,213 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Dashboard";
+    var role = ViewBag.Role as string;
+    var userName = ViewBag.UserName as string;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container py-4">
+    <div class="mb-4">
+        <h2>Welcome back, <strong>@userName</strong> 👋</h2>
+        <p class="text-muted">@DateTime.Now.ToString("dddd, MMMM dd yyyy")</p>
+    </div>
+
+    @if (role == "Clinic Manager")
+    {
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card text-white bg-primary h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Doctors</h5>
+                        <h2>@ViewBag.TotalDoctors</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-success h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Patients</h5>
+                        <h2>@ViewBag.TotalPatients</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-info h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Today's Appointments</h5>
+                        <h2>@ViewBag.TodayAppointments</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-warning h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Pending Requests</h5>
+                        <h2>@ViewBag.PendingAppointments</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <a href="/Doctors" class="card text-decoration-none text-dark h-100">
+                    <div class="card-body text-center">
+                        <i class="fs-1">👨‍⚕️</i>
+                        <h5 class="mt-2">Manage Doctors</h5>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/Patients" class="card text-decoration-none text-dark h-100">
+                    <div class="card-body text-center">
+                        <i class="fs-1">🧑‍🤝‍🧑</i>
+                        <h5 class="mt-2">Manage Patients</h5>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/Appointments" class="card text-decoration-none text-dark h-100">
+                    <div class="card-body text-center">
+                        <i class="fs-1">📅</i>
+                        <h5 class="mt-2">Manage Appointments</h5>
+                    </div>
+                </a>
+            </div>
+        </div>
+    }
+
+    @if (role == "Doctor")
+    {
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card text-white bg-primary h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Today's Appointments</h5>
+                        <h2>@ViewBag.TotalToday</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-success h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Completed</h5>
+                        <h2>@ViewBag.TotalCompleted</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-warning h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Unread Notifications</h5>
+                        <h2>@ViewBag.UnreadNotifications</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="mb-3">📋 Upcoming Appointments</h5>
+        @if (ViewBag.UpcomingAppointments != null && ((List<MediConnectAPI.Models.Appointment>)ViewBag.UpcomingAppointments).Count > 0)
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Patient</th>
+                            <th>Date & Time</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var a in (List<MediConnectAPI.Models.Appointment>)ViewBag.UpcomingAppointments)
+                        {
+                            <tr>
+                                <td>@a.Patient?.Name</td>
+                                <td>@a.AppointmentDate.ToString("MMM dd, yyyy hh:mm tt")</td>
+                                <td>@a.Reason</td>
+                                <td><span class="badge bg-info">@a.Status</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">No upcoming appointments.</div>
+        }
+    }
+
+    @if (role == "Patient")
+    {
+        <h5 class="mb-3">📅 Your Upcoming Appointments</h5>
+        @if (ViewBag.UpcomingAppointments != null && ((List<MediConnectAPI.Models.Appointment>)ViewBag.UpcomingAppointments).Count > 0)
+        {
+            @foreach (var a in (List<MediConnectAPI.Models.Appointment>)ViewBag.UpcomingAppointments)
+            {
+                <div class="card mb-3 border-start border-primary border-4">
+                    <div class="card-body">
+                        <h6 class="card-title">Dr. @a.Doctor?.Name</h6>
+                        <p class="mb-1">📅 @a.AppointmentDate.ToString("dddd, MMM dd yyyy - hh:mm tt")</p>
+                        <p class="mb-1">📝 @a.Reason</p>
+                        <span class="badge bg-primary">@a.Status</span>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="alert alert-info">No upcoming appointments. <a href="/Appointments/Create">Book one now</a>.</div>
+        }
+    }
+
+    @if (role == "Receptionist")
+    {
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="card text-white bg-info h-100">
+                    <div class="card-body">
+                        <h5>Today's Appointments</h5>
+                        <h2>@ViewBag.TodayAppointments</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card text-white bg-warning h-100">
+                    <div class="card-body">
+                        <h5>Pending Requests</h5>
+                        <h2>@ViewBag.PendingAppointments</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="mb-3">📋 Today's Schedule</h5>
+        @if (ViewBag.TodayList != null && ((List<MediConnectAPI.Models.Appointment>)ViewBag.TodayList).Count > 0)
+        {
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in (List<MediConnectAPI.Models.Appointment>)ViewBag.TodayList)
+                    {
+                        <tr>
+                            <td>@a.Patient?.Name</td>
+                            <td>@a.Doctor?.Name</td>
+                            <td>@a.AppointmentDate.ToString("hh:mm tt")</td>
+                            <td><span class="badge bg-secondary">@a.Status</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="alert alert-info">No appointments today.</div>
+        }
+    }
 </div>

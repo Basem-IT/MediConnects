@@ -10,31 +10,38 @@ namespace MediConnectAPI.Controllers
     [Route("api/[controller]")]
     public class DoctorsController : ControllerBase
     {
+        // database context object
         private readonly MediConnectDbContext _context;
 
+        // constructor to initialize database context
         public DoctorsController(MediConnectDbContext context)
         {
             _context = context;
         }
 
-        // GET /api/doctors
+        // this endpoint gets all doctors
+        // can also filter doctors by specialization id
         [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<DoctorResponseDto>>> GetDoctors(
             [FromQuery] int? specializationID)
         {
+            // getting doctors with their specializations
             var query = _context.Doctors
                 .Include(d => d.DoctorSpecializations)
                     .ThenInclude(ds => ds.Specialization)
                 .AsQueryable();
 
+            // filter doctors if specialization id is provided
             if (specializationID.HasValue)
                 query = query.Where(d =>
                     d.DoctorSpecializations.Any(ds =>
                         ds.SpecializationID == specializationID));
 
+            // execute query and store doctors list
             var doctors = await query.ToListAsync();
 
+            // return doctors as dto objects
             return Ok(doctors.Select(d => new DoctorResponseDto
             {
                 DoctorID = d.DoctorID,
@@ -42,25 +49,30 @@ namespace MediConnectAPI.Controllers
                 Email = d.Email,
                 Phone = d.Phone,
                 Qualification = d.Qualification,
+
+                // getting specialization names only
                 Specializations = d.DoctorSpecializations
                                    .Select(ds => ds.Specialization?.Name ?? string.Empty)
                                    .ToList()
             }));
         }
 
-        // GET /api/doctors/{id}
+        // this endpoint gets one doctor using doctor id.
         [HttpGet("{id:int}")]
         [AllowAnonymous]
         public async Task<ActionResult<DoctorResponseDto>> GetDoctor(int id)
         {
+            // searching for doctor with specialization details
             var d = await _context.Doctors
                 .Include(d => d.DoctorSpecializations)
                     .ThenInclude(ds => ds.Specialization)
                 .FirstOrDefaultAsync(d => d.DoctorID == id);
 
+            // return the error if doctor does not exist
             if (d == null)
                 return NotFound(new { message = $"Doctor {id} not found" });
 
+            // return doctordetails
             return Ok(new DoctorResponseDto
             {
                 DoctorID = d.DoctorID,
@@ -68,13 +80,15 @@ namespace MediConnectAPI.Controllers
                 Email = d.Email,
                 Phone = d.Phone,
                 Qualification = d.Qualification,
+
+                // converting specialization objects into names
                 Specializations = d.DoctorSpecializations
                                    .Select(ds => ds.Specialization?.Name ?? string.Empty)
                                    .ToList()
             });
         }
 
-        // GET /api/doctors/{id}/schedule
+        // this endpoint gets doctor schedule and appointments
         [HttpGet("{id:int}/schedule")]
         [Authorize(Roles = "ClinicManager,Receptionist,Doctor,Patient")]
         public async Task<ActionResult<DoctorScheduleDto>> GetDoctorSchedule(
@@ -82,19 +96,23 @@ namespace MediConnectAPI.Controllers
             [FromQuery] DateTime? from,
             [FromQuery] DateTime? to)
         {
+            // finding doctor by id
             var doctor = await _context.Doctors.FindAsync(id);
+
+            // checking if doctor exists
             if (doctor == null)
                 return NotFound(new { message = $"Doctor {id} not found" });
 
-            // Load all schedule slots for the specified doctor id
+            // getting all schedule slots for this doctor
             var schedules = await _context.Schedules
                 .Where(s => s.DoctorID == id)
                 .ToListAsync();
 
+            // setting default dates if user does not enter them
             var fromDate = from?.Date ?? DateTime.UtcNow.Date;
             var toDate = to?.Date ?? fromDate.AddDays(7);
 
-            // Load upcoming appointments in the date range
+            // getting appointments in selected date range
             var appointments = await _context.Appointments
                 .Include(a => a.Patient)
                 .Include(a => a.Schedule)
@@ -107,10 +125,13 @@ namespace MediConnectAPI.Controllers
                 .OrderBy(a => a.AppointmentDate)
                 .ToListAsync();
 
+            // returning doctor schedule info
             return Ok(new DoctorScheduleDto
             {
                 DoctorID = doctor.DoctorID,
                 DoctorName = doctor.Name,
+
+                // converting schedules into dto format
                 Schedules = schedules.Select(s => new ScheduleSlotDto
                 {
                     ScheduleID = s.ScheduleID,
@@ -119,6 +140,8 @@ namespace MediConnectAPI.Controllers
                     EndTime = s.EndTime,
                     IsAvailable = s.IsAvailable
                 }).ToList(),
+
+                // converting appointments into dto format
                 UpcomingAppointments = appointments.Select(a => new AppointmentResponseDto
                 {
                     AppointmentID = a.AppointmentID,

@@ -13,11 +13,13 @@ namespace MediConnectMVC.Controllers
     {
         private readonly MediConnectDbContext _context;
 
+        // database access
         public PrescriptionsController(MediConnectDbContext context)
         {
             _context = context;
         }
 
+        // show all prescriptions with filter
         public async Task<IActionResult> Index()
         {
             var role = HttpContext.Session.GetString("Role");
@@ -28,6 +30,7 @@ namespace MediConnectMVC.Controllers
                     .ThenInclude(m => m.Patient)
                 .AsQueryable();
 
+            // if it is a patient only show their own prescriptions
             if (role == "Patient")
             {
                 prescriptions = prescriptions.Where(p =>
@@ -39,8 +42,10 @@ namespace MediConnectMVC.Controllers
             return View(await prescriptions.ToListAsync());
         }
 
+        // open create prescription page
         public IActionResult Create()
         {
+            // dropdown list for medical records
             ViewBag.RecordID = new SelectList(
                 _context.MedicalRecords
                     .Include(m => m.Patient)
@@ -56,10 +61,12 @@ namespace MediConnectMVC.Controllers
             return View();
         }
 
+        // save the new prescription
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Prescription prescription)
         {
+            // ignore navigation property validation issue
             ModelState.Remove("MedicalRecord");
 
             if (ModelState.IsValid)
@@ -69,6 +76,7 @@ namespace MediConnectMVC.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // reload dropdown if validation fails
             ViewBag.RecordID = new SelectList(
                 _context.MedicalRecords
                     .Include(m => m.Patient)
@@ -85,6 +93,7 @@ namespace MediConnectMVC.Controllers
             return View(prescription);
         }
 
+        // open edit page
         public async Task<IActionResult> Edit(int id)
         {
             var prescription = await _context.Prescriptions.FindAsync(id);
@@ -92,6 +101,7 @@ namespace MediConnectMVC.Controllers
             if (prescription == null)
                 return NotFound();
 
+            // dropdown for editing record selection
             ViewBag.RecordID = new SelectList(
                 _context.MedicalRecords
                     .Include(m => m.Patient)
@@ -108,6 +118,7 @@ namespace MediConnectMVC.Controllers
             return View(prescription);
         }
 
+        // update prescription data
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Prescription prescription)
@@ -121,6 +132,7 @@ namespace MediConnectMVC.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // reload dropdown if something goes wrong
             ViewBag.RecordID = new SelectList(
                 _context.MedicalRecords
                     .Include(m => m.Patient)
@@ -137,6 +149,7 @@ namespace MediConnectMVC.Controllers
             return View(prescription);
         }
 
+        // confirm delete page
         public async Task<IActionResult> Delete(int id)
         {
             var prescription = await _context.Prescriptions
@@ -150,6 +163,7 @@ namespace MediConnectMVC.Controllers
             return View(prescription);
         }
 
+        // actually delete prescription
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

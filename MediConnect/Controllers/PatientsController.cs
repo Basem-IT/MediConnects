@@ -12,23 +12,26 @@ namespace MediConnectMVC.Controllers
     {
         private readonly MediConnectDbContext _context;
 
-
+        // database connection
         public PatientsController(MediConnectDbContext context)
         {
             _context = context;
         }
 
+        // show all patients
         public async Task<IActionResult> Index()
         {
             var patients = await _context.Patients.ToListAsync();
             return View(patients);
         }
 
+        // open create patient page
         public IActionResult Create()
         {
             return View();
         }
 
+        // save new patient
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Patient patient)
@@ -43,6 +46,7 @@ namespace MediConnectMVC.Controllers
             return View(patient);
         }
 
+        // open edit page
         public async Task<IActionResult> Edit(int id)
         {
             var patient = await _context.Patients.FindAsync(id);
@@ -53,6 +57,7 @@ namespace MediConnectMVC.Controllers
             return View(patient);
         }
 
+        // update the patient details
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Patient patient)
@@ -67,6 +72,7 @@ namespace MediConnectMVC.Controllers
             return View(patient);
         }
 
+        // open delete confirmation page
         public async Task<IActionResult> Delete(int id)
         {
             var patient = await _context.Patients.FindAsync(id);
@@ -77,6 +83,7 @@ namespace MediConnectMVC.Controllers
             return View(patient);
         }
 
+        // delete patient from database
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

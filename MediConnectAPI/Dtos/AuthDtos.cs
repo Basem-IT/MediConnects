@@ -2,7 +2,7 @@
 
 namespace MediConnectAPI.DTOs
 {
-    // What the clients submits to register
+    // the clients submits to register
     public class RegisterDto
     {
         [Required]
@@ -11,11 +11,11 @@ namespace MediConnectAPI.DTOs
         [Required, MinLength(6)]
         public string Password { get; set; } = string.Empty;
 
-        // Role name: "Patient", "Doctor", "Receptionist", "ClinicManager"
+        // the role name patient etc
         [Required]
         public string RoleName { get; set; } = "Patient";
 
-        // Patient-specific fields (only needed if RoleName == "Patient")
+        // only for patients
         public string? PatientName { get; set; }
         public int? CPR { get; set; }
         public DateTime? DOB { get; set; }
@@ -23,7 +23,7 @@ namespace MediConnectAPI.DTOs
         public int? Phone { get; set; }
     }
 
-    // What the clients submits to login
+    // person submits to login
     public class LoginDto
     {
         [Required]
@@ -33,7 +33,7 @@ namespace MediConnectAPI.DTOs
         public string Password { get; set; } = string.Empty;
     }
 
-    // What the API returns after a successful login/register
+    // the api returns after a successful login or register
     public class AuthResponseDto
     {
         public string Token { get; set; } = string.Empty;
@@ -41,7 +41,7 @@ namespace MediConnectAPI.DTOs
         public string UserName { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
 
-        // Returned so the MVC app knows which patient record belongs to this user
+        // returned so the mvc app knows to which patient record belongs to this user
         public int? PatientID { get; set; }
     }
 }

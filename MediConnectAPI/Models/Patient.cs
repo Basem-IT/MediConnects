@@ -2,7 +2,6 @@
 
 namespace MediConnectAPI.Models
 
-// Added by Student 2 for the public appointment lookup feature, which is generated automatically when a patient is registered. In the format: "PAT-0001", "PAT-0002", etc.
 {
     public class Patient
     {
@@ -18,10 +17,8 @@ namespace MediConnectAPI.Models
 
         public int Phone { get; set; }
 
-        // Added by Student 2 for public appointment lookup
         public string ReferenceCode { get; set; } = string.Empty;
 
-        // LOGIN LINK
         public int? UserID { get; set; }
 
         [ForeignKey("UserID")]

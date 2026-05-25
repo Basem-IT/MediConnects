@@ -1,6 +1,6 @@
 ﻿namespace MediConnectAPI.DTOs
 {
-    // Doctor profile 
+    // the doctor profile 
     public class DoctorResponseDto
     {
         public int DoctorID { get; set; }
@@ -9,12 +9,12 @@
         public string Phone { get; set; } = string.Empty;
         public string Qualification { get; set; } = string.Empty;
 
-        // Specialization names compressed into a simple list
+        // specialization names into a simplee list
         public List<string> Specializations { get; set; } = new();
     }
 
-    // Doctor schedule: working slots and booked appointments 
-    // Used by the reporting app and MVC booking page
+    // doctor schedule working slots and booked appointments 
+
     public class DoctorScheduleDto
     {
         public int DoctorID { get; set; }
@@ -23,7 +23,8 @@
         public List<AppointmentResponseDto> UpcomingAppointments { get; set; } = new();
     }
 
-    // Single schedule slot 
+    // schedule slot 
+
     public class ScheduleSlotDto
     {
         public int ScheduleID { get; set; }
