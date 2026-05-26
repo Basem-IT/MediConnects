@@ -1,47 +1,48 @@
 ﻿@model IEnumerable<MediConnectAPI.Models.Schedule>
 
-<h1>Schedules</h1>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold" style="color:#ff4fa3;">Schedules</h2>
+        <a asp-action="Create" class="btn btn-primary">+ Add Schedule</a>
+    </div>
 
-<a asp-action="Create" class="btn btn-primary mb-3">Add Schedule</a>
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>Schedule ID</th>
-            <th>Doctor</th>
-            <th>Day</th>
-            <th>Start Time</th>
-            <th>End Time</th>
-            <th>Available</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        @foreach (var schedule in Model)
-        {
-            <tr>
-                <td>@schedule.ScheduleID</td>
-                <td>@schedule.Doctor?.Name</td>
-                <td>@schedule.DayOfWeek</td>
-                <td>@schedule.StartTime</td>
-                <td>@schedule.EndTime</td>
-                <td>@schedule.IsAvailable</td>
-
-                <td>
-                    <a asp-action="Edit"
-                       asp-route-id="@schedule.ScheduleID"
-                       class="btn btn-warning btn-sm">
-                        Edit
-                    </a>
-
-                    <a asp-action="Delete"
-                       asp-route-id="@schedule.ScheduleID"
-                       class="btn btn-danger btn-sm">
-                        Delete
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Doctor</th>
+                    <th>Day</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Available</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var schedule in Model)
+                {
+                    <tr>
+                        <td>@schedule.Doctor?.Name</td>
+                        <td>@schedule.DayOfWeek</td>
+                        <td>@schedule.StartTime.ToString("hh:mm tt")</td>
+                        <td>@(DateTime.TryParse(schedule.EndTime, out var et) ? et.ToString("hh:mm tt") : schedule.EndTime)</td>
+                        <td>
+                            @if (schedule.IsAvailable)
+                            {
+                                <span class="badge" style="background: linear-gradient(135deg,#ff4fa3,#ff7dc1);">Available</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Unavailable</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@schedule.ScheduleID" class="btn btn-warning btn-sm">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@schedule.ScheduleID" class="btn btn-danger btn-sm">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

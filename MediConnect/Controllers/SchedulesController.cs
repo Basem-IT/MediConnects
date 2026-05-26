@@ -19,21 +19,41 @@ namespace MediConnectMVC.Controllers
             _context = context;
         }
 
-        // show all the schedules
+        // show schedules - doctors only see their own
         public async Task<IActionResult> Index()
         {
-            var schedules = await _context.Schedules
-                .Include(s => s.Doctor)
-                .ToListAsync();
+            var role = HttpContext.Session.GetString("Role");
+            var userId = HttpContext.Session.GetInt32("UserID");
 
-            return View(schedules);
+            var schedules = _context.Schedules.Include(s => s.Doctor).AsQueryable();
+
+            // filter by doctor if logged in as doctor
+            if (role == "Doctor")
+            {
+                var doctor = await _context.Doctors
+                    .FirstOrDefaultAsync(d => d.UserID == userId);
+                if (doctor != null)
+                    schedules = schedules.Where(s => s.DoctorID == doctor.DoctorID);
+            }
+
+            return View(await schedules.ToListAsync());
         }
 
         // open create page
         public IActionResult Create()
         {
-            // load doctors for dropdown list
-            ViewBag.DoctorID = new SelectList(_context.Doctors, "DoctorID", "Name");
+            var role = HttpContext.Session.GetString("Role");
+
+            // only clinic manager picks the doctor
+            if (role == "Clinic Manager")
+                ViewBag.DoctorID = new SelectList(_context.Doctors, "DoctorID", "Name");
+
+            // dropdown for days instead of free text
+            ViewBag.Days = new SelectList(new[]
+            {
+                "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+            });
+
             return View();
         }
 
@@ -42,6 +62,10 @@ namespace MediConnectMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Schedule schedule)
         {
+            // remove nav properties so validation doesnt fail
+            ModelState.Remove("Doctor");
+            ModelState.Remove("Appointments");
+
             if (ModelState.IsValid)
             {
                 _context.Schedules.Add(schedule);
@@ -49,12 +73,16 @@ namespace MediConnectMVC.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // if validation fails, reload dropdown
+            // reload dropdowns if validation fails
             ViewBag.DoctorID = new SelectList(_context.Doctors, "DoctorID", "Name", schedule.DoctorID);
+            ViewBag.Days = new SelectList(new[]
+            {
+                "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+            });
             return View(schedule);
         }
 
-        // open the edit page
+        // open edit page
         public async Task<IActionResult> Edit(int id)
         {
             var schedule = await _context.Schedules.FindAsync(id);
@@ -63,14 +91,24 @@ namespace MediConnectMVC.Controllers
                 return NotFound();
 
             ViewBag.DoctorID = new SelectList(_context.Doctors, "DoctorID", "Name", schedule.DoctorID);
+
+            // pass current day so dropdown shows correct selected value
+            ViewBag.Days = new SelectList(new[]
+            {
+                "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+            }, schedule.DayOfWeek);
+
             return View(schedule);
         }
 
-        // update schedule data
+        // save edited schedule
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Schedule schedule)
         {
+            ModelState.Remove("Doctor");
+            ModelState.Remove("Appointments");
+
             if (ModelState.IsValid)
             {
                 _context.Schedules.Update(schedule);
@@ -79,7 +117,25 @@ namespace MediConnectMVC.Controllers
             }
 
             ViewBag.DoctorID = new SelectList(_context.Doctors, "DoctorID", "Name", schedule.DoctorID);
+            ViewBag.Days = new SelectList(new[]
+            {
+                "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+            }, schedule.DayOfWeek);
             return View(schedule);
+        }
+
+        // lets doctors toggle their availability on/off
+        [HttpPost]
+        public async Task<IActionResult> ToggleAvailability(int id)
+        {
+            var schedule = await _context.Schedules.FindAsync(id);
+            if (schedule != null)
+            {
+                // flip the available flag
+                schedule.IsAvailable = !schedule.IsAvailable;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         // show delete confirmation page
@@ -95,7 +151,7 @@ namespace MediConnectMVC.Controllers
             return View(schedule);
         }
 
-        // actually delete schedule and related data
+        // actually delete the schedule and all linked data
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -111,33 +167,30 @@ namespace MediConnectMVC.Controllers
 
                 foreach (var appointment in appointments)
                 {
-                    // remove notifications related to appointment
+                    // remove notifications for this appointment
                     var notifications = _context.Notifications
                         .Where(n => n.AppointmentID == appointment.AppointmentID);
-
                     _context.Notifications.RemoveRange(notifications);
 
-                    // get medical records linked to appointment
+                    // get medical records linked to this appointment
                     var medicalRecords = _context.MedicalRecords
                         .Where(m => m.AppointmentID == appointment.AppointmentID)
                         .ToList();
 
                     foreach (var record in medicalRecords)
                     {
-                        // remove prescriptions inside medical records
+                        // remove prescriptions inside each record
                         var prescriptions = _context.Prescriptions
                             .Where(p => p.RecordID == record.RecordID);
-
                         _context.Prescriptions.RemoveRange(prescriptions);
                     }
 
                     _context.MedicalRecords.RemoveRange(medicalRecords);
                 }
 
-                // delete appointments then schedule
+                // delete appointments then the schedule itself
                 _context.Appointments.RemoveRange(appointments);
                 _context.Schedules.Remove(schedule);
-
                 await _context.SaveChangesAsync();
             }
 

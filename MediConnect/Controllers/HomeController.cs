@@ -29,7 +29,7 @@ namespace MediConnectMVC.Controllers
 
             ViewBag.Role = role;
             ViewBag.UserName = userName;
-            ViewBag.UnreadNotifications = _context.Notifications.Count(n => !n.IsRead);
+            ViewBag.UnreadNotifications = _context.Notifications.Count(n => !n.IsRead && n.UserID == userId);
 
             if (role == "Doctor")
             {
