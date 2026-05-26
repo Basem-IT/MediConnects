@@ -168,7 +168,7 @@ namespace MediConnectAPI.Migrations
 
                 SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationID"));
 
-                b.Property<int>("AppointmentID")
+                b.Property<int?>("AppointmentID")
                     .HasColumnType("int");
 
                 b.Property<DateTime>("CreatedAt")
@@ -184,6 +184,9 @@ namespace MediConnectAPI.Migrations
                 b.Property<string>("Type")
                     .IsRequired()
                     .HasColumnType("nvarchar(max)");
+
+                b.Property<int?>("UserID")
+                    .HasColumnType("int");
 
                 b.HasKey("NotificationID");
 
@@ -470,8 +473,7 @@ namespace MediConnectAPI.Migrations
                 b.HasOne("MediConnectAPI.Models.Appointment", "Appointment")
                     .WithMany("Notifications")
                     .HasForeignKey("AppointmentID")
-                    .OnDelete(DeleteBehavior.NoAction)
-                    .IsRequired();
+                    .OnDelete(DeleteBehavior.NoAction);
 
                 b.Navigation("Appointment");
             });

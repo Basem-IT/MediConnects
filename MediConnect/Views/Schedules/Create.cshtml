@@ -1,35 +1,45 @@
 ﻿@model MediConnectAPI.Models.Schedule
+@{
+    var role = Context.Session.GetString("Role");
+}
 
-<h1>Add Schedule</h1>
+<div class="container py-4" style="max-width:600px;">
+    <h2 class="fw-bold mb-4" style="color:#ff4fa3;">Add Schedule</h2>
 
-<form asp-action="Create" method="post">
-    <div class="mb-3">
-        <label>Doctor</label>
-        <select asp-for="DoctorID" class="form-control" asp-items="ViewBag.DoctorID"></select>
-    </div>
+    <form asp-action="Create" method="post">
+        @if (role == "Clinic Manager")
+        {
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Doctor</label>
+                <select asp-for="DoctorID" class="form-select" asp-items="ViewBag.DoctorID">
+                    <option value="">-- Select Doctor --</option>
+                </select>
+            </div>
+        }
 
-    <div class="mb-3">
-        <label>Day Of Week</label>
-        <input asp-for="DayOfWeek" class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Day of Week</label>
+            <select asp-for="DayOfWeek" class="form-select" asp-items="ViewBag.Days">
+                <option value="">-- Select Day --</option>
+            </select>
+        </div>
 
-    <div class="mb-3">
-        <label>Start Time</label>
-        <input asp-for="StartTime" type="datetime-local" class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Start Time</label>
+            <input asp-for="StartTime" type="time" class="form-control" />
+        </div>
 
-    <div class="mb-3">
-        <label>End Time</label>
-        <input asp-for="EndTime"
-               type="datetime-local"
-               class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label class="form-label fw-semibold">End Time</label>
+            <input asp-for="EndTime" type="time" class="form-control" />
+        </div>
 
-    <div class="mb-3 form-check">
-        <input asp-for="IsAvailable" class="form-check-input" />
-        <label class="form-check-label">Available</label>
-    </div>
+        <div class="mb-3 form-check">
+            <input asp-for="IsAvailable" class="form-check-input" />
+            <label class="form-check-label">Available</label>
+        </div>
 
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Back</a>
-</form>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a asp-action="Index" class="btn btn-secondary">Back</a>
+    </form>
+</div>

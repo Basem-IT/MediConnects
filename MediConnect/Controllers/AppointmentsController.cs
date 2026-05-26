@@ -34,14 +34,14 @@ namespace MediConnectMVC.Controllers
                 .Include(a => a.Schedule)
                 .ToListAsync();
 
-            // load patient manually for each appointment 
+            // load patient manually for each appointment
             foreach (var a in appointments)
             {
                 a.Patient = await _context.Patients
                     .FirstOrDefaultAsync(p => p.PatientID == a.PatientID);
             }
 
-            // if it is  patient only show their own appointments
+            // if patient only show their own appointments
             if (role == "Patient")
             {
                 var patient = await _context.Patients
@@ -49,6 +49,18 @@ namespace MediConnectMVC.Controllers
 
                 if (patient != null)
                     appointments = appointments.Where(a => a.PatientID == patient.PatientID).ToList();
+                else
+                    appointments = new List<Appointment>();
+            }
+
+            // doctors only see their own appointments
+            if (role == "Doctor")
+            {
+                var doctor = await _context.Doctors
+                    .FirstOrDefaultAsync(d => d.UserID == userId);
+
+                if (doctor != null)
+                    appointments = appointments.Where(a => a.DoctorID == doctor.DoctorID).ToList();
                 else
                     appointments = new List<Appointment>();
             }
@@ -65,7 +77,7 @@ namespace MediConnectMVC.Controllers
             ViewBag.Role = role;
             ViewBag.DoctorID = new SelectList(_context.Doctors, "DoctorID", "Name");
 
-            // if patient, auto fill their info
+            // if patient auto fill their info
             if (role == "Patient")
             {
                 var patient = _context.Patients.FirstOrDefault(p => p.UserID == userId);
@@ -89,12 +101,12 @@ namespace MediConnectMVC.Controllers
             var userId = HttpContext.Session.GetInt32("UserID");
             var userName = HttpContext.Session.GetString("UserName");
 
-            // if patient is booking, auto assign patient id
+            // if patient is booking auto assign patient id
             if (role == "Patient")
             {
                 var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserID == userId);
 
-                // if thepatient not found, create one
+                // if patient record not found create one
                 if (patient == null)
                 {
                     patient = new Patient
@@ -132,7 +144,7 @@ namespace MediConnectMVC.Controllers
                 appointment.ScheduleID = matchingSchedule.ScheduleID;
             }
 
-            // ignore some fields for validation issues
+            // ignore nav properties so validation doesnt fail
             ModelState.Remove("PatientID");
             ModelState.Remove("Status");
             ModelState.Remove("Patient");
@@ -140,35 +152,7 @@ namespace MediConnectMVC.Controllers
             ModelState.Remove("Schedule");
             ModelState.Remove("ScheduleID");
 
-            // check status flow (can't jump steps randomly)
-            var existing = await _context.Appointments
-                .AsNoTracking()
-                .FirstOrDefaultAsync(a => a.AppointmentID == appointment.AppointmentID);
-
-            if (existing != null)
-            {
-                var validTransitions = new Dictionary<string, List<string>>
-                {
-                    { "Requested", new() { "Confirmed", "Cancelled" } },
-                    { "Confirmed", new() { "Checked-In", "Cancelled" } },
-                    { "Checked-In", new() { "In Progress", "Cancelled" } },
-                    { "In Progress", new() { "Completed", "Missed" } },
-                    { "Completed", new() },
-                    { "Cancelled", new() },
-                    { "Missed", new() }
-                };
-
-                if (existing.Status != appointment.Status &&
-                    !validTransitions[existing.Status].Contains(appointment.Status))
-                {
-                    TempData["StatusError"] =
-                        $"Invalid status change from {existing.Status} to {appointment.Status}";
-
-                    return RedirectToAction("Edit", new { id = appointment.AppointmentID });
-                }
-            }
-
-            // prevent multiple bookings for patient
+            // prevent multiple bookings for same patient
             if (role == "Patient")
             {
                 bool alreadyBooked = await _context.Appointments
@@ -183,7 +167,25 @@ namespace MediConnectMVC.Controllers
                 _context.Appointments.Add(appointment);
                 await _context.SaveChangesAsync();
 
-                // send update to all clients using signalR
+                // notify the doctor about the new appointment
+                var doctor = await _context.Doctors
+                    .FirstOrDefaultAsync(d => d.DoctorID == appointment.DoctorID);
+
+                if (doctor?.UserID != null)
+                {
+                    _context.Notifications.Add(new Notification
+                    {
+                        AppointmentID = appointment.AppointmentID,
+                        Type = "New Appointment",
+                        Message = $"A new appointment has been booked with you on {appointment.AppointmentDate:MMM dd, yyyy}.",
+                        CreatedAt = DateTime.Now,
+                        IsRead = false,
+                        UserID = doctor.UserID
+                    });
+                    await _context.SaveChangesAsync();
+                }
+
+                // send live update via signalR
                 await _hubContext.Clients.All.SendAsync("AppointmentStatusUpdated", new
                 {
                     appointmentId = appointment.AppointmentID,
@@ -193,10 +195,24 @@ namespace MediConnectMVC.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            ViewBag.Role = role;
+            ViewBag.DoctorID = new SelectList(_context.Doctors, "DoctorID", "Name", appointment.DoctorID);
+
+            if (role == "Patient")
+            {
+                var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserID == userId);
+                ViewBag.PatientName = patient?.Name ?? userName;
+                ViewBag.PatientID = patient?.PatientID;
+            }
+            else
+            {
+                ViewBag.PatientID = new SelectList(_context.Patients, "PatientID", "Name", appointment.PatientID);
+            }
+
             return View(appointment);
         }
 
-        // edit appointment page
+        // open edit appointment page
         public async Task<IActionResult> Edit(int id)
         {
             var role = HttpContext.Session.GetString("Role");
@@ -220,7 +236,7 @@ namespace MediConnectMVC.Controllers
             return View(appointment);
         }
 
-        // update appointment
+        // save appointment changes
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Appointment appointment)
@@ -230,8 +246,34 @@ namespace MediConnectMVC.Controllers
             if (role == "Patient")
                 return RedirectToAction(nameof(Index));
 
-            var dayOfWeek = appointment.AppointmentDate.DayOfWeek.ToString();
+            // check status transition is valid
+            var existing = await _context.Appointments
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => a.AppointmentID == appointment.AppointmentID);
 
+            if (existing != null && existing.Status != appointment.Status)
+            {
+                var validTransitions = new Dictionary<string, List<string>>
+                {
+                    { "Requested",   new() { "Confirmed", "Cancelled" } },
+                    { "Confirmed",   new() { "Checked-In", "Cancelled" } },
+                    { "Checked-In",  new() { "In Progress", "Cancelled" } },
+                    { "In Progress", new() { "Completed", "Missed" } },
+                    { "Completed",   new() },
+                    { "Cancelled",   new() },
+                    { "Missed",      new() }
+                };
+
+                if (!validTransitions[existing.Status].Contains(appointment.Status))
+                {
+                    TempData["StatusError"] = $"Cannot change status from '{existing.Status}' to '{appointment.Status}'. " +
+                        $"Allowed: {string.Join(", ", validTransitions[existing.Status])}";
+                    return RedirectToAction("Edit", new { id = appointment.AppointmentID });
+                }
+            }
+
+            // auto assign schedule based on appointment date
+            var dayOfWeek = appointment.AppointmentDate.DayOfWeek.ToString();
             var schedule = await _context.Schedules.FirstOrDefaultAsync(s =>
                 s.DoctorID == appointment.DoctorID &&
                 s.DayOfWeek == dayOfWeek &&
@@ -250,19 +292,43 @@ namespace MediConnectMVC.Controllers
                 _context.Appointments.Update(appointment);
                 await _context.SaveChangesAsync();
 
-                // create notification for update
-                var notification = new Notification
-                {
-                    AppointmentID = appointment.AppointmentID,
-                    Type = "Appointment Update",
-                    Message = $"Status changed to {appointment.Status}",
-                    CreatedAt = DateTime.Now,
-                    IsRead = false
-                };
+                // notify the patient about status change
+                var appointmentPatient = await _context.Patients
+                    .FirstOrDefaultAsync(p => p.PatientID == appointment.PatientID);
 
-                _context.Notifications.Add(notification);
+                if (appointmentPatient?.UserID != null)
+                {
+                    _context.Notifications.Add(new Notification
+                    {
+                        AppointmentID = appointment.AppointmentID,
+                        Type = "Appointment Update",
+                        Message = $"Your appointment status has been changed to '{appointment.Status}'.",
+                        CreatedAt = DateTime.Now,
+                        IsRead = false,
+                        UserID = appointmentPatient.UserID
+                    });
+                }
+
+                // also notify the doctor
+                var appointmentDoctor = await _context.Doctors
+                    .FirstOrDefaultAsync(d => d.DoctorID == appointment.DoctorID);
+
+                if (appointmentDoctor?.UserID != null)
+                {
+                    _context.Notifications.Add(new Notification
+                    {
+                        AppointmentID = appointment.AppointmentID,
+                        Type = "Appointment Update",
+                        Message = $"Appointment status updated to '{appointment.Status}'.",
+                        CreatedAt = DateTime.Now,
+                        IsRead = false,
+                        UserID = appointmentDoctor.UserID
+                    });
+                }
+
                 await _context.SaveChangesAsync();
 
+                // send live update via signalR
                 await _hubContext.Clients.All.SendAsync("AppointmentStatusUpdated", new
                 {
                     appointmentId = appointment.AppointmentID,
@@ -271,6 +337,13 @@ namespace MediConnectMVC.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
+
+            ViewBag.DoctorID = new SelectList(_context.Doctors, "DoctorID", "Name", appointment.DoctorID);
+            ViewBag.PatientID = new SelectList(_context.Patients, "PatientID", "Name", appointment.PatientID);
+            ViewBag.StatusOptions = new SelectList(new[]
+            {
+                "Requested", "Confirmed", "Checked-In", "In Progress", "Completed", "Cancelled", "Missed"
+            }, appointment.Status);
 
             return View(appointment);
         }
@@ -294,7 +367,7 @@ namespace MediConnectMVC.Controllers
             return View(appointment);
         }
 
-        // delete appointment and cleanup related data
+        // actually delete the appointment and all linked data
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -312,7 +385,7 @@ namespace MediConnectMVC.Controllers
                 var notifications = _context.Notifications.Where(n => n.AppointmentID == id);
                 _context.Notifications.RemoveRange(notifications);
 
-                // remove medical records andprescriptions
+                // remove medical records and prescriptions
                 var medicalRecords = _context.MedicalRecords
                     .Where(m => m.AppointmentID == id)
                     .ToList();
@@ -321,12 +394,10 @@ namespace MediConnectMVC.Controllers
                 {
                     var prescriptions = _context.Prescriptions
                         .Where(p => p.RecordID == record.RecordID);
-
                     _context.Prescriptions.RemoveRange(prescriptions);
                 }
 
                 _context.MedicalRecords.RemoveRange(medicalRecords);
-
                 _context.Appointments.Remove(appointment);
                 await _context.SaveChangesAsync();
             }

@@ -11,43 +11,35 @@ namespace MediConnectMVC.Controllers
     {
         private readonly MediConnectDbContext _context;
 
-        // database access setup
+        // inject db context
         public AccountController(MediConnectDbContext context)
         {
             _context = context;
         }
 
-        // open login page
+        // show login page
         public IActionResult Login()
         {
             return View();
         }
 
-        // login check
+        // handle login form submission
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            // find user by username and include role
+            // find user by username and load their role
             var user = await _context.Users
                 .Include(u => u.Role)
-                .FirstOrDefaultAsync(u =>
-                   u.UserName == model.UserName);
+                .FirstOrDefaultAsync(u => u.UserName == model.UserName);
 
-            // check if user exists and password matches
+            // check password using bcrypt
             if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
             {
                 ViewBag.Error = "Invalid username or password";
                 return View(model);
             }
 
-            // (extra check but kinda repeated)
-            if (user == null)
-            {
-                ViewBag.Error = "Invalid username or password";
-                return View(model);
-            }
-
-            // save user info in session
+            // save to session so we know who is logged in
             HttpContext.Session.SetString("UserName", user.UserName);
             HttpContext.Session.SetString("Role", user.Role?.RoleName ?? "");
             HttpContext.Session.SetInt32("UserID", user.UserID);
@@ -55,32 +47,32 @@ namespace MediConnectMVC.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        // logout and clear session
+        // clear session and go back to login
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
         }
 
-        // open register page
+        // show register page
         public IActionResult Register()
         {
             return View();
         }
 
-        // register new user + patient
+        // handle register form
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            // check password confirmation
+            // make sure passwords match
             if (model.Password != model.ConfirmPassword)
             {
                 ViewBag.Error = "Passwords do not match";
                 return View(model);
             }
 
-            // check if username already exists
+            // check if username is taken
             var existingUser = await _context.Users
                 .FirstOrDefaultAsync(u => u.UserName == model.UserName);
 
@@ -90,7 +82,7 @@ namespace MediConnectMVC.Controllers
                 return View(model);
             }
 
-            // check if role is valid
+            // make sure role exists
             var role = await _context.Roles
                 .FirstOrDefaultAsync(r => r.RoleName == model.RoleName);
 
@@ -100,7 +92,7 @@ namespace MediConnectMVC.Controllers
                 return View(model);
             }
 
-            // create new user account
+            // create user with hashed password
             var user = new MediConnectAPI.Models.User
             {
                 UserName = model.UserName,
@@ -111,7 +103,7 @@ namespace MediConnectMVC.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            // create patient profile linked to user
+            // create patient profile linked to this user
             var patient = new Patient
             {
                 Name = model.FullName,
@@ -128,12 +120,12 @@ namespace MediConnectMVC.Controllers
             return RedirectToAction("Login");
         }
 
-        // show user profile page
+        // show profile page for logged in user
         public async Task<IActionResult> Profile()
         {
             var userId = HttpContext.Session.GetInt32("UserID");
 
-            // if not logged in, go back to login
+            // redirect if not logged in
             if (userId == null)
                 return RedirectToAction("Login");
 
@@ -145,18 +137,28 @@ namespace MediConnectMVC.Controllers
             return View(user);
         }
 
-        // update profile info
+        // save profile changes
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Profile(MediConnectAPI.Models.User user)
         {
+            // remove fields not in the form so validation doesnt block us
+            ModelState.Remove("Password");
+            ModelState.Remove("Role");
+            ModelState.Remove("Staffs");
+
             if (ModelState.IsValid)
             {
-                _context.Users.Update(user);
-                await _context.SaveChangesAsync();
+                // update only the username field
+                var existing = await _context.Users.FindAsync(user.UserID);
+                if (existing != null)
+                {
+                    existing.UserName = user.UserName;
+                    await _context.SaveChangesAsync();
 
-                // update session username
-                HttpContext.Session.SetString("UserName", user.UserName);
+                    // update session so navbar shows new name
+                    HttpContext.Session.SetString("UserName", user.UserName);
+                }
 
                 return RedirectToAction("Index", "Home");
             }
