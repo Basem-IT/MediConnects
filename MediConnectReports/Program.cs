@@ -13,7 +13,7 @@ builder.Services.AddScoped<MediConnectReports.Services.ApiService>();
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
