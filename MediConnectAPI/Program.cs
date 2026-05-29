@@ -112,10 +112,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 
-// authentication first then authorization
+//authentication first then authorization
 app.UseAuthentication();
 app.UseAuthorization();
 

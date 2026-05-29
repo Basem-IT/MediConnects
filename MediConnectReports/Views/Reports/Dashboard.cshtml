@@ -1,97 +1,100 @@
 ﻿@model DashboardViewModel
 
-<h2>Clinic Manager Reports Dashboard</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 style="color:#ff4fa3; font-weight:700;">Reports Dashboard</h2>
+    <a asp-controller="Auth" asp-action="Logout" class="btn btn-outline-danger btn-sm">Logout</a>
+</div>
 
-<p>
-    <a asp-controller="Auth" asp-action="Logout">Logout</a>
-</p>
-
-<div class="cards">
-    <div class="card">
-        <h3>Total</h3>
-        <h2>@Model.Statistics.TotalAppointments</h2>
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card p-3 text-center">
+            <p class="text-muted mb-1">Total</p>
+            <h2 style="color:#ff4fa3; font-weight:700;">@Model.Statistics.TotalAppointments</h2>
+        </div>
     </div>
-
-    <div class="card">
-        <h3>Completed</h3>
-        <h2>@Model.Statistics.CompletedAppointments</h2>
+    <div class="col-md-3">
+        <div class="card p-3 text-center">
+            <p class="text-muted mb-1">Completed</p>
+            <h2 style="color:#28a745; font-weight:700;">@Model.Statistics.CompletedAppointments</h2>
+        </div>
     </div>
-
-    <div class="card">
-        <h3>Cancelled</h3>
-        <h2>@Model.Statistics.CancelledAppointments</h2>
+    <div class="col-md-3">
+        <div class="card p-3 text-center">
+            <p class="text-muted mb-1">Cancelled</p>
+            <h2 style="color:#dc3545; font-weight:700;">@Model.Statistics.CancelledAppointments</h2>
+        </div>
     </div>
-
-    <div class="card">
-        <h3>Missed</h3>
-        <h2>@Model.Statistics.MissedAppointments</h2>
+    <div class="col-md-3">
+        <div class="card p-3 text-center">
+            <p class="text-muted mb-1">Missed</p>
+            <h2 style="color:#fd7e14; font-weight:700;">@Model.Statistics.MissedAppointments</h2>
+        </div>
     </div>
 </div>
 
-<div class="card">
-    <h3>Missed Appointment Rate</h3>
-    <p>@Model.MissedRate.MissedRate%</p>
+<!-- Missed Rate -->
+<div class="card p-3 mb-4">
+    <h5 style="color:#ff4fa3; font-weight:700;">Missed Appointment Rate</h5>
+    <h3 class="mb-0">@Model.MissedRate.MissedRate%</h3>
 </div>
 
-<div class="card">
-    <h3>Doctor Utilization</h3>
-
-    <table>
-        <tr>
-            <th>Doctor</th>
-            <th>Appointments</th>
-        </tr>
-
-        @foreach (var item in Model.DoctorUtilization)
-        {
-            <tr>
-                <td>@item.DoctorName</td>
-                <td>@item.AppointmentCount</td>
-            </tr>
-        }
+<!-- Doctor Utilization -->
+<div class="card p-3 mb-4">
+    <h5 style="color:#ff4fa3; font-weight:700;" class="mb-3">Doctor Utilization</h5>
+    <table class="table table-hover mb-0">
+        <thead>
+            <tr><th>Doctor</th><th>Appointments</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.DoctorUtilization)
+            {
+                <tr>
+                    <td>@item.DoctorName</td>
+                    <td>@item.AppointmentCount</td>
+                </tr>
+            }
+        </tbody>
     </table>
 </div>
 
-<div class="card">
-    <h3>Appointments By Status</h3>
-
-    <table>
-        <tr>
-            <th>Status</th>
-            <th>Count</th>
-        </tr>
-
-        @foreach (var item in Model.AppointmentsByStatus)
-        {
-            <tr>
-                <td>@item.Status</td>
-                <td>@item.Count</td>
-            </tr>
-        }
+<!-- Appointments By Status -->
+<div class="card p-3 mb-4">
+    <h5 style="color:#ff4fa3; font-weight:700;" class="mb-3">Appointments By Status</h5>
+    <table class="table table-hover mb-0">
+        <thead>
+            <tr><th>Status</th><th>Count</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.AppointmentsByStatus)
+            {
+                <tr>
+                    <td>@item.Status</td>
+                    <td>@item.Count</td>
+                </tr>
+            }
+        </tbody>
     </table>
 </div>
 
-<div class="card">
-    <h3>Recent Appointments</h3>
-
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Date</th>
-            <th>Doctor</th>
-            <th>Patient</th>
-            <th>Status</th>
-        </tr>
-
-        @foreach (var item in Model.RecentAppointments)
-        {
-            <tr>
-                <td>@item.AppointmentId</td>
-                <td>@item.AppointmentDate.ToString("dd/MM/yyyy HH:mm")</td>
-                <td>@item.DoctorName</td>
-                <td>@item.PatientName</td>
-                <td>@item.Status</td>
-            </tr>
-        }
+<!-- Recent Appointments -->
+<div class="card p-3 mb-4">
+    <h5 style="color:#ff4fa3; font-weight:700;" class="mb-3">Recent Appointments</h5>
+    <table class="table table-hover mb-0">
+        <thead>
+            <tr><th>ID</th><th>Date</th><th>Doctor</th><th>Patient</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.RecentAppointments)
+            {
+                <tr>
+                    <td>@item.AppointmentId</td>
+                    <td>@item.AppointmentDate.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@item.DoctorName</td>
+                    <td>@item.PatientName</td>
+                    <td>@item.Status</td>
+                </tr>
+            }
+        </tbody>
     </table>
 </div>
