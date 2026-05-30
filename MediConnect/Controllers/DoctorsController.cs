@@ -7,7 +7,7 @@ using MediConnectMVC.Filters;
 namespace MediConnectMVC.Controllers
 {
     [SessionAuthorize]
-    [RoleAuthorize("Clinic Manager")]
+    [RoleAuthorize("ClinicManager")]
     public class DoctorsController : Controller
     {
         private readonly MediConnectDbContext _context;

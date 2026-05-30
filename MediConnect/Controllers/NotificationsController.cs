@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace MediConnectMVC.Controllers
 {
     [SessionAuthorize]
-    [RoleAuthorize("Clinic Manager", "Receptionist", "Doctor", "Patient")]
+    [RoleAuthorize("ClinicManager", "Receptionist", "Doctor", "Patient")]
     public class NotificationsController : Controller
     {
         private readonly MediConnectDbContext _context;

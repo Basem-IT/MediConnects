@@ -87,7 +87,7 @@ namespace MediConnectMVC.Controllers
                     ViewBag.PatientName = patient.Name;
                 }
             }
-            else if (role == "Clinic Manager")
+            else if (role == "ClinicManager")
             {
                 // stats for clinic manager dashboard
                 ViewBag.TotalDoctors = await _context.Doctors.CountAsync();
