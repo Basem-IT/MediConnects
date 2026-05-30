@@ -8,7 +8,7 @@ using MediConnectMVC.Filters;
 namespace MediConnectMVC.Controllers
 {
     [SessionAuthorize]
-    [RoleAuthorize("Clinic Manager", "Receptionist", "Doctor")]
+    [RoleAuthorize("Clinic  Manager", "Receptionist", "Doctor")]
     public class SchedulesController : Controller
     {
         private readonly MediConnectDbContext _context;
@@ -45,7 +45,7 @@ namespace MediConnectMVC.Controllers
             var role = HttpContext.Session.GetString("Role");
 
             // only clinic manager picks the doctor
-            if (role == "Clinic Manager")
+            if (role == "ClinicManager")
                 ViewBag.DoctorID = new SelectList(_context.Doctors, "DoctorID", "Name");
 
             // dropdown for days instead of free text

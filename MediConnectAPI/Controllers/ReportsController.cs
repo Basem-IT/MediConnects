@@ -7,7 +7,7 @@ namespace MediConnectAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Clinic Manager")]
+    [Authorize(Roles = "ClinicManager")]
     public class ReportsController : ControllerBase
     {
         private readonly MediConnectDbContext _context;

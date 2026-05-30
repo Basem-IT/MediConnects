@@ -9,7 +9,7 @@ namespace MediConnectMVC.Controllers
 {
     [SessionAuthorize]
 
-    [RoleAuthorize("Clinic Manager", "Doctor")]
+    [RoleAuthorize("ClinicManager", "Doctor")]
     public class MedicalRecordsController : Controller
     {
         private readonly MediConnectDbContext _context;
