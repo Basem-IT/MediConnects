@@ -142,7 +142,6 @@ namespace MediConnectMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Profile(MediConnectAPI.Models.User user)
         {
-            // remove fields not in the form so validation doesnt block us
             ModelState.Remove("Password");
             ModelState.Remove("Role");
             ModelState.Remove("Staffs");
