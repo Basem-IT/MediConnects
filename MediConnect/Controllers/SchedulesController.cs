@@ -8,7 +8,7 @@ using MediConnectMVC.Filters;
 namespace MediConnectMVC.Controllers
 {
     [SessionAuthorize]
-    [RoleAuthorize("Clinic  Manager", "Receptionist", "Doctor")]
+    [RoleAuthorize("ClinicManager", "Receptionist", "Doctor")]
     public class SchedulesController : Controller
     {
         private readonly MediConnectDbContext _context;
